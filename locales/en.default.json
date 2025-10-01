@@ -113,15 +113,15 @@
     "product_title": "Example product title",
     "collection_title": "Your collection's name"
   },
-  "product": {
+  "products": {
     "banner": {
-          "no_color_option": "No Color option found for this product. Palette not shown.",
-
+      "no_color_option": "No Color option found for this product. Palette not shown.",
       "missing_product": "Failed to load product: please pass product or handle.",
       "not_available": "Not available",
       "available": "Available",
       "available_with_count": "Available: __count__",
       "select_color": "Select color",
+      "select_size": "Select size",
       "add_to_cart": "Add to cart",
       "old_price": "Old price",
       "switch_image": "Switch image",

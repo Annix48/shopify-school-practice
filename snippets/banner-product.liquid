@@ -6,7 +6,7 @@
 
 {%- if current_product == null -%}
   <div class="bp bp--error" style="padding:1rem;border:1px dashed #ddd;border-radius:.75rem">
-    {{ 'product.banner.missing_product' | t | default: 'Failed to load product: please pass product or handle.' }}
+    {{ 'products.banner.missing_product' | t | default: 'Failed to load product: please pass product or handle.' }}
   </div>
 {%- else -%}
 
@@ -31,7 +31,7 @@
   <div class="bp">
     <div class="bp__head"><strong>{{ title_safe }}</strong></div>
     <div class="bp__body" style="margin-top:.5rem">
-      {{ 'product.banner.no_color_option' | t | default: 'No Color option found for this product. Palette not shown.' }}
+      {{ 'products.banner.no_color_option' | t | default: 'No Color option found for this product. Palette not shown.' }}
     </div>
   </div>
 {%- else -%}
@@ -51,7 +51,7 @@
     <div class="bp__price">
       {%- if main_variant.compare_at_price and main_variant.compare_at_price > main_variant.price -%}
         <span class="bp__price--new">{{ main_variant.price | money_without_trailing_zeros }}</span>
-        <s class="bp__price--old" aria-label="{{ 'product.banner.old_price' | t | default: 'Old price' }}">{{ main_variant.compare_at_price | money_without_trailing_zeros }}</s>
+        <s class="bp__price--old" aria-label="{{ 'products.banner.old_price' | t | default: 'Old price' }}">{{ main_variant.compare_at_price | money_without_trailing_zeros }}</s>
       {%- else -%}
         <span class="bp__price--regular">{{ main_variant.price | money_without_trailing_zeros }}</span>
       {%- endif -%}
@@ -89,7 +89,7 @@
 
     <!-- COLORS (thumbnails with images) -->
     <div class="bp__colors">
-      <div class="bp__label">{{ 'product.banner.select_color' | t | default: 'Select color' }}</div>
+      <div class="bp__label">{{ 'products.banner.select_color' | t | default: 'Select color' }}</div>
       <div class="bp__swatches" role="list">
         {%- assign printed = 0 -%}
         {%- for color in colors_uniq -%}
@@ -157,11 +157,11 @@
     </div>
 
     <!-- STOCK LINE -->
-    <div class="bp__stock" data-stock>{{ 'product.banner.select_color' | t | default: 'Select color' }}</div>
+    <div class="bp__stock" data-stock>{{ 'products.banner.select_color' | t | default: 'Select color' }}</div>
 
     <!-- SIZES (dynamic, per color) -->
     <div class="bp__sizes" data-sizes hidden>
-      <div class="bp__label">{{ 'product.banner.select_size' | t | default: 'Select size' }}</div>
+      <div class="bp__label">{{ 'products.banner.select_size' | t | default: 'Select size' }}</div>
       <div class="bp__sizes-list"></div>
     </div>
 
@@ -169,7 +169,7 @@
     {%- if main_variant -%}
       <div class="bp__cta">
         <a href="{{ routes.cart_add_url }}?id={{ main_variant.id }}&quantity=1" class="bp__add">
-          {{ 'product.banner.add_to_cart' | t | default: 'Add to cart' }}
+          {{ 'products.banner.add_to_cart' | t | default: 'Add to cart' }}
         </a>
       </div>
     {%- endif -%}
@@ -291,16 +291,13 @@
     });
   }
 
-  // main swatch click
+  
   swatches.forEach(function(btn){
     btn.addEventListener('click', function(){
       setActive(swatches, btn);
-      // switch hero image to color preview
       var img = btn.getAttribute('data-image');
       if(mainImg && img){ mainImg.src = img; }
-      // when color changes — rebuild sizes
       renderSizes(btn);
-      // also reset stock text (until выберут размер)
       stockEl.textContent = {{ "product.banner.select_size" | t | default: "Select size" | json }};
     });
   });
