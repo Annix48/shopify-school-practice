@@ -1,15 +1,3 @@
-{% comment %}
-  File: snippets/banner-product.liquid
-
-  Usage examples:
-    {% render 'banner-product', handle: 'some-product-handle' %}
-    {% render 'banner-product', product: product %}
-
-  Notes:
-  - Prefer passing a stable `handle` to avoid scope issues.
-  - all_products has a request limit — do not overuse it site-wide.
-{% endcomment %}
-
 {%- assign current_product = product | default: null -%}
 {%- if current_product == null and handle -%}
   {%- assign current_product = all_products[handle] -%}
@@ -27,7 +15,6 @@
   {%- assign featured_img = current_product.featured_image -%}
   {%- assign title_safe = current_product.title | escape -%}
 
-  {%- comment -%} Determine the Color option index (1..3) {%- endcomment -%}
   {%- assign color_index = 0 -%}
   {%- for opt in current_product.options_with_values -%}
     {%- assign opt_name = opt.name | downcase -%}
@@ -224,18 +211,50 @@
       </div>
     </div>
 
-    <style>
-      .bp__swatch[data-color*="black" i] .bp__swatch-dot{ --c:#000; }
-      .bp__swatch[data-color*="white" i] .bp__swatch-dot{ --c:#fff; }
-      .bp__swatch[data-color*="red"   i] .bp__swatch-dot{ --c:#e11; }
-      .bp__swatch[data-color*="blue"  i] .bp__swatch-dot{ --c:#39f; }
-      .bp__swatch[data-color*="green" i] .bp__swatch-dot{ --c:#3c6; }
-      .bp__swatch[data-color*="beige" i] .bp__swatch-dot{ --c:#e6d8c3; }
-      .bp__swatch[data-color*="grey" i],
-      .bp__swatch[data-color*="gray" i] .bp__swatch-dot{ --c:#bbb; }
-      .bp__swatch.is-active{ outline:2px solid #111; outline-offset:2px; }
-      .bp__placeholder{ width:100%; height: 140px; background:#f6f6f6; border-radius:.75rem; }
-    </style>
+   <style>
+  /* Card/grid */
+  .bp{display:grid;grid-template-columns:160px 1fr;gap:1rem;align-items:start;border:1px solid #eee;border-radius:1rem;padding:1rem}
+  .bp--error{border-style:dashed}
+
+  /* Media */
+  .bp__media img{display:block;max-width:100%;height:auto;border-radius:.75rem;background:#f6f6f6}
+  .bp__thumbs{display:flex;gap:.5rem;margin-top:.5rem}
+  .bp__thumb{border:1px solid #eee;border-radius:.5rem;padding:0;background:#fff;cursor:pointer}
+  .bp__thumb img{display:block}
+
+  /* Header & price */
+  .bp__title{margin:0;font-size:1.125rem;line-height:1.25}
+  .bp__price{display:flex;gap:.5rem;align-items:baseline}
+  .bp__price--new,.bp__price--regular{font-weight:700}
+
+  /* Swatches */
+  .bp__label{font-size:.875rem;margin-bottom:.25rem}
+  .bp__swatches{display:flex;gap:.5rem;flex-wrap:wrap}
+  .bp__swatch{min-width:2rem;height:2rem;border-radius:999px;border:1px solid #ccc;display:inline-flex;align-items:center;justify-content:center;background:#fff;position:relative;cursor:pointer}
+  .bp__swatch-dot{display:block;width:1.25rem;height:1.25rem;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);background:var(--c,#f3f3f3)}
+  .bp__swatch.is-active{outline:2px solid #111;outline-offset:2px}
+  .bp__swatch.is-disabled{opacity:.45;cursor:not-allowed}
+
+  /* Stock line */
+  .bp__stock{font-size:.875rem;color:#333}
+
+  /* CTA */
+  .bp__add{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:#111;color:#fff;border-radius:.5rem;padding:.6rem .9rem;text-decoration:none}
+
+  /* Placeholder */
+  .bp__placeholder{width:100%;height:140px;background:#f6f6f6;border-radius:.75rem}
+
+  /* Цветовые подсказки для дотів */
+  .bp__swatch[data-color*="black" i] .bp__swatch-dot{ --c:#000; }
+  .bp__swatch[data-color*="white" i] .bp__swatch-dot{ --c:#fff; }
+  .bp__swatch[data-color*="red"   i] .bp__swatch-dot{ --c:#e11; }
+  .bp__swatch[data-color*="blue"  i] .bp__swatch-dot{ --c:#39f; }
+  .bp__swatch[data-color*="green" i] .bp__swatch-dot{ --c:#3c6; }
+  .bp__swatch[data-color*="beige" i] .bp__swatch-dot{ --c:#e6d8c3; }
+  .bp__swatch[data-color*="grey" i],
+  .bp__swatch[data-color*="gray" i] .bp__swatch-dot{ --c:#bbb; }
+</style>
+
 
     <script>
       (function(){
