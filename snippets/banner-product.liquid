@@ -160,8 +160,13 @@
               {%- assign v = matched.first -%}
               {%- if v == null -%}{%- continue -%}{%- endif -%}
 
-             {%- assign qty            = v.inventory_quantity | default: 0 -%}
-{%- assign inv_tracked    = v.inventory_management != nil -%}  {# было: != null #}
+            {%- assign qty = v.inventory_quantity | default: 0 -%}
+
+{%- assign inv_tracked = false -%}
+{%- if v.inventory_management -%}
+  {%- assign inv_tracked = true -%}
+{%- endif -%}
+
 {%- assign available_flag = v.available -%}
 
 {%- assign is_unavailable = false -%}
@@ -170,6 +175,7 @@
 {%- elsif inv_tracked == false and available_flag == false -%}
   {%- assign is_unavailable = true -%}
 {%- endif -%}
+
 
 
               <button
