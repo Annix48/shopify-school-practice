@@ -122,15 +122,22 @@
               {%- assign v = matched.first -%}
               {%- if v == null -%}{%- continue -%}{%- endif -%}
 
-              {%- assign qty          = v.inventory_quantity | default: 0 -%}
-              {%- assign inv_tracked  = v.inventory_management != nil -%}
-              {%- assign available_f  = v.available -%}
-              {%- assign is_unavailable = false -%}
-              {%- if inv_tracked and qty == 0 -%}
-                {%- assign is_unavailable = true -%}
-              {%- elsif inv_tracked == false and available_f == false -%}
-                {%- assign is_unavailable = true -%}
-              {%- endif -%}
+              {%- assign qty = v.inventory_quantity | default: 0 -%}
+
+{%- assign inv_tracked = false -%}
+{%- if v.inventory_management -%}
+  {%- assign inv_tracked = true -%}
+{%- endif -%}
+
+{%- assign available_f = v.available -%}
+
+{%- assign is_unavailable = false -%}
+{%- if inv_tracked and qty == 0 -%}
+  {%- assign is_unavailable = true -%}
+{%- elsif inv_tracked == false and available_f == false -%}
+  {%- assign is_unavailable = true -%}
+{%- endif -%}
+
 
               <button
                 type="button"
