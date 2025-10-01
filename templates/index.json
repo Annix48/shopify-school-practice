@@ -62,6 +62,7 @@
     },
     "featured_collection": {
       "type": "featured-collection",
+      "name": "Featured Collection",
       "settings": {
         "collection": "all",
         "products_to_show": 8,
