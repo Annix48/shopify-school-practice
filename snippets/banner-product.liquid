@@ -220,7 +220,7 @@
 .bp__media{
   display:grid;
   grid-template-columns: 120px 1fr;
-  gap: 20px;
+  gap: 24px;
   align-items:start;
 }
 .bp__thumbs{
@@ -247,10 +247,20 @@
   position:relative;
   background:#f3f3f3;
   border-radius:14px;
+  min-height: 560px;  
   padding:16px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 .bp__hero img{
-  width:100%; height:auto; display:block; border-radius:12px; background:#f3f3f3;
+  max-width:100%; 
+  height:auto; 
+  object-fit: contain;  
+  display:block; 
+  border-radius:12px; 
+  background:#f3f3f3;
 }
 .bp__chip{
   position:absolute; left:16px; top:16px;
