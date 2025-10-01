@@ -1,5 +1,4 @@
 
-
 {%- assign current_product = product | default: null -%}
 {%- if current_product == null and handle -%}
   {%- assign current_product = all_products[handle] -%}
@@ -11,308 +10,313 @@
   </div>
 {%- else -%}
 
-  {%- assign featured_img = current_product.featured_image -%}
-  {%- assign title_safe = current_product.title | escape -%}
+{%- assign featured_img = current_product.featured_image -%}
+{%- assign title_safe = current_product.title | escape -%}
 
-  {%- comment -%} find color option index {%- endcomment -%}
-  {%- assign color_index = 0 -%}
-  {%- for opt in current_product.options_with_values -%}
-    {%- assign opt_name = opt.name | downcase -%}
-    {%- if opt_name == 'color' or opt_name == 'colour' or opt_name == 'цвет' or opt_name == 'kolor' -%}
-      {%- assign color_index = forloop.index -%}
-      {%- break -%}
-    {%- endif -%}
-  {%- endfor -%}
-  {%- if color_index == 0 and current_product.options.size > 0 -%}
-    {%- assign color_index = 1 -%}
+/* ---- find option indexes: color & size ---- */
+{%- assign color_index = 0 -%}
+{%- assign size_index  = 0 -%}
+{%- for opt in current_product.options_with_values -%}
+  {%- assign n = opt.name | downcase -%}
+  {%- if n == 'color' or n == 'colour' or n == 'цвет' or n == 'kolor' -%}
+    {%- assign color_index = forloop.index -%}
+  {%- elsif n == 'size' or n == 'rozmiar' or n == 'размер' -%}
+    {%- assign size_index = forloop.index -%}
   {%- endif -%}
+{%- endfor -%}
+{%- if color_index == 0 and current_product.options.size > 0 -%}{%- assign color_index = 1 -%}{%- endif -%}
 
-  {%- if color_index == 0 -%}
-    <div class="bp">
-      <div class="bp__head"><strong>{{ title_safe }}</strong></div>
-      <div class="bp__body" style="margin-top:.5rem">
-        {{ 'product.banner.no_color_option' | t | default: 'No Color option found for this product. Palette not shown.' }}
-      </div>
+/* ---- if no color option at all ---- */
+{%- if color_index == 0 -%}
+  <div class="bp">
+    <div class="bp__head"><strong>{{ title_safe }}</strong></div>
+    <div class="bp__body" style="margin-top:.5rem">
+      {{ 'product.banner.no_color_option' | t | default: 'No Color option found for this product. Palette not shown.' }}
     </div>
-  {%- else -%}
+  </div>
+{%- else -%}
 
-    {%- case color_index -%}
-      {%- when 1 -%}{%- assign colors_all = current_product.variants | map: 'option1' -%}
-      {%- when 2 -%}{%- assign colors_all = current_product.variants | map: 'option2' -%}
-      {%- when 3 -%}{%- assign colors_all = current_product.variants | map: 'option3' -%}
-    {%- endcase -%}
-    {%- assign colors_uniq = colors_all | uniq -%}
+/* ---- collect unique colors ---- */
+{%- case color_index -%}
+  {%- when 1 -%}{%- assign colors_all = current_product.variants | map: 'option1' -%}
+  {%- when 2 -%}{%- assign colors_all = current_product.variants | map: 'option2' -%}
+  {%- when 3 -%}{%- assign colors_all = current_product.variants | map: 'option3' -%}
+{%- endcase -%}
+{%- assign colors_uniq = colors_all | uniq -%}
 
-    {%- assign main_variant = current_product.selected_or_first_available_variant | default: current_product.variants.first -%}
-
-    {%- capture price_block -%}
-      {%- if main_variant and main_variant.price -%}
-        <div class="bp__price">
-          {%- if main_variant.compare_at_price and main_variant.compare_at_price > main_variant.price -%}
-            <span class="bp__price--new">{{ main_variant.price | money_without_trailing_zeros }}</span>
-            <s class="bp__price--old" aria-label="{{ 'product.banner.old_price' | t | default: 'Old price' }}">
-              {{ main_variant.compare_at_price | money_without_trailing_zeros }}
-            </s>
-          {%- else -%}
-            <span class="bp__price--regular">{{ main_variant.price | money_without_trailing_zeros }}</span>
-          {%- endif -%}
-        </div>
+/* ---- main variant and price block ---- */
+{%- assign main_variant = current_product.selected_or_first_available_variant | default: current_product.variants.first -%}
+{%- capture price_block -%}
+  {%- if main_variant and main_variant.price -%}
+    <div class="bp__price">
+      {%- if main_variant.compare_at_price and main_variant.compare_at_price > main_variant.price -%}
+        <span class="bp__price--new">{{ main_variant.price | money_without_trailing_zeros }}</span>
+        <s class="bp__price--old" aria-label="{{ 'product.banner.old_price' | t | default: 'Old price' }}">{{ main_variant.compare_at_price | money_without_trailing_zeros }}</s>
+      {%- else -%}
+        <span class="bp__price--regular">{{ main_variant.price | money_without_trailing_zeros }}</span>
       {%- endif -%}
-    {%- endcapture -%}
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
 
-    {%- assign vendor_down = current_product.vendor | downcase -%}
-    {%- capture vendor_badge -%}
-      {%- case vendor_down -%}
-        {%- when 'nike','adidas' -%}
-          <span class="bp__badge">{{ 'product.banner.badge.top_brand' | t | default: 'Highly Rated' }}</span>
-      {%- endcase -%}
-    {%- endcapture -%}
+{%- assign variants = current_product.variants -%}
 
-    {%- assign variants = current_product.variants -%}
+<div class="bp" data-product-id="{{ current_product.id }}">
+  <div class="bp__media">
+    {%- if featured_img -%}
+      {{ featured_img | image_url: width: 900 | image_tag: loading: 'lazy', alt: featured_img.alt | default: title_safe }}
+    {%- else -%}
+      {{ 'image' | placeholder_svg_tag: 'bp__placeholder' }}
+    {%- endif -%}
 
-    <div class="bp" data-product-id="{{ current_product.id }}">
-      <!-- media column -->
-      <div class="bp__media">
-        <div class="bp__thumbs">
-          {%- if current_product.images.size > 1 -%}
-            {%- for img in current_product.images -%}
-              {%- if forloop.index0 == 0 -%}{%- continue -%}{%- endif -%}
-              {%- if forloop.index > 4 -%}{%- break -%}{%- endif -%}
-              <button
-                type="button"
-                class="bp__thumb"
-                data-image="{{ img | image_url: width: 1100 }}"
-                aria-label="{{ 'product.banner.switch_image' | t | default: 'Switch image' }}"
-              >
-                {{ img | image_url: width: 200 | image_tag: loading: 'lazy', alt: img.alt | default: title_safe }}
-              </button>
-            {%- endfor -%}
-          {%- endif -%}
-        </div>
-
-        {%- if featured_img -%}
-          {{ featured_img | image_url: width: 1100 | image_tag: loading: 'lazy', alt: featured_img.alt | default: title_safe }}
-        {%- else -%}
-          {{ 'image' | placeholder_svg_tag }}
-        {%- endif -%}
+    {%- if current_product.images.size > 1 -%}
+      <div class="bp__thumbs">
+        {%- for img in current_product.images limit:3 -%}
+          <button type="button" class="bp__thumb" data-image="{{ img | image_url: width: 900 }}">
+            {{ img | image_url: width: 96 | image_tag: loading: 'lazy', alt: img.alt | default: title_safe }}
+          </button>
+        {%- endfor -%}
       </div>
+    {%- endif -%}
+  </div>
 
-      <!-- content column -->
-      <div class="bp__content">
-        <div class="bp__top">
-          <h3 class="bp__title">{{ title_safe }}</h3>
-          {{- vendor_badge -}}
-        </div>
+  <div class="bp__content">
+    <div class="bp__top">
+      <h3 class="bp__title">{{ title_safe }}</h3>
+    </div>
 
-        {{- price_block -}}
+    {{- price_block -}}
 
-        <div class="bp__colors">
-          <div class="bp__label">{{ 'product.banner.select_color' | t | default: 'Select color' }}</div>
+    <!-- COLORS (thumbnails with images) -->
+    <div class="bp__colors">
+      <div class="bp__label">{{ 'product.banner.select_color' | t | default: 'Select color' }}</div>
+      <div class="bp__swatches" role="list">
+        {%- assign printed = 0 -%}
+        {%- for color in colors_uniq -%}
+          {%- if color == blank -%}{%- continue -%}{%- endif -%}
 
-          <div class="bp__swatches" role="list">
-            {%- assign printed = 0 -%}
-            {%- for color in colors_uniq -%}
-              {%- if color == blank -%}{%- continue -%}{%- endif -%}
+          {%- comment -%} all variants for this color {%- endcomment -%}
+          {%- case color_index -%}
+            {%- when 1 -%}{%- assign color_variants = variants | where: 'option1', color -%}
+            {%- when 2 -%}{%- assign color_variants = variants | where: 'option2', color -%}
+            {%- when 3 -%}{%- assign color_variants = variants | where: 'option3', color -%}
+          {%- endcase -%}
 
-              {%- case color_index -%}
-                {%- when 1 -%}{%- assign matched = variants | where: 'option1', color -%}
-                {%- when 2 -%}{%- assign matched = variants | where: 'option2', color -%}
-                {%- when 3 -%}{%- assign matched = variants | where: 'option3', color -%}
-              {%- endcase -%}
-              {%- assign v = matched.first -%}
-              {%- if v == null -%}{%- continue -%}{%- endif -%}
+          {%- assign v = color_variants.first -%}
+          {%- if v == null -%}{%- continue -%}{%- endif -%}
 
-              {%- assign qty = v.inventory_quantity | default: 0 -%}
+          {%- assign hero_image = v.image | default: featured_img -%}
 
-{%- assign inv_tracked = false -%}
-{%- if v.inventory_management -%}
-  {%- assign inv_tracked = true -%}
-{%- endif -%}
+          {%- comment -%}
+            build sizes JSON for this color (if size option exists)
+          {%- endcomment -%}
+          {%- capture sizes_json -%}
+            [
+            {%- if size_index > 0 -%}
+              {%- for vv in color_variants -%}
+                {%- case size_index -%}
+                  {%- when 1 -%}{%- assign size_label = vv.option1 -%}
+                  {%- when 2 -%}{%- assign size_label = vv.option2 -%}
+                  {%- when 3 -%}{%- assign size_label = vv.option3 -%}
+                {%- endcase -%}
+                {
+                  "id": {{ vv.id }},
+                  "label": {{ size_label | json }},
+                  "qty": {{ vv.inventory_quantity | default: 0 }},
+                  "available": {{ vv.available | json }},
+                  "invTracked": {{ vv.inventory_management | json }},
+                  "image": {{ (vv.image | default: hero_image) | image_url: width: 900 | json }}
+                }{%- if forloop.last == false -%},{%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+            ]
+          {%- endcapture -%}
 
-{%- assign available_f = v.available -%}
+          <button
+            type="button"
+            role="listitem"
+            class="bp__swatch bp__swatch--thumb"
+            data-variant-id="{{ v.id }}"
+            data-image="{{ hero_image | image_url: width: 900 }}"
+            data-sizes='{{ sizes_json | strip | escape }}'
+            aria-label="{{ color | escape }}"
+            title="{{ color | escape }}"
+          >
+            {%- if hero_image -%}
+              {{ hero_image | image_url: width: 72 | image_tag: loading: 'lazy', alt: color }}
+            {%- else -%}
+              <span class="bp__swatch-dot" aria-hidden="true"></span>
+            {%- endif -%}
+            <span class="bp__swatch-label">{{ color | escape }}</span>
+          </button>
 
-{%- assign is_unavailable = false -%}
-{%- if inv_tracked and qty == 0 -%}
-  {%- assign is_unavailable = true -%}
-{%- elsif inv_tracked == false and available_f == false -%}
-  {%- assign is_unavailable = true -%}
-{%- endif -%}
-
-
-              <button
-                type="button"
-                role="listitem"
-                class="bp__swatch{% if is_unavailable %} is-disabled{% endif %}"
-                data-variant-id="{{ v.id }}"
-                data-qty="{{ qty }}"
-                data-available="{{ available_f }}"
-                data-inv-tracked="{{ inv_tracked }}"
-                data-image="{{ v.image | default: featured_img | image_url: width: 1100 }}"
-                data-color="{{ color | escape }}"
-                aria-label="{{ color | escape }}"
-              >
-                <span class="bp__swatch-dot" aria-hidden="true"></span>
-                <span class="bp__swatch-label" style="position:absolute;left:-9999px">{{ color | escape }}</span>
-              </button>
-
-              {%- assign printed = printed | plus: 1 -%}
-              {%- if printed >= 3 -%}{%- break -%}{%- endif -%}
-            {%- endfor -%}
-          </div>
-
-          <div class="bp__stock" data-stock>
-            {{ 'product.banner.select_color' | t | default: 'Select color' }}
-          </div>
-        </div>
-
-        {%- if main_variant -%}
-          <div class="bp__cta">
-            <a
-              href="{{ routes.cart_add_url }}?id={{ main_variant.id }}&quantity=1"
-              class="bp__add"
-            >
-              {{ 'product.banner.add_to_cart' | t | default: 'Add to cart' }}
-            </a>
-          </div>
-        {%- endif -%}
+          {%- assign printed = printed | plus: 1 -%}
+          {%- if printed >= 3 -%}{%- break -%}{%- endif -%}
+        {%- endfor -%}
       </div>
     </div>
 
-    <style>
-      /* Card */
-      .bp{
-        display:grid;
-        grid-template-columns: 560px 1fr;
-        gap:32px;
-        align-items:start;
-        background:#fff;
-        border:1px solid #eee;
-        border-radius:16px;
-        padding:24px;
+    <!-- STOCK LINE -->
+    <div class="bp__stock" data-stock>{{ 'product.banner.select_color' | t | default: 'Select color' }}</div>
+
+    <!-- SIZES (dynamic, per color) -->
+    <div class="bp__sizes" data-sizes hidden>
+      <div class="bp__label">{{ 'product.banner.select_size' | t | default: 'Select size' }}</div>
+      <div class="bp__sizes-list"></div>
+    </div>
+
+    <!-- CTA -->
+    {%- if main_variant -%}
+      <div class="bp__cta">
+        <a href="{{ routes.cart_add_url }}?id={{ main_variant.id }}&quantity=1" class="bp__add">
+          {{ 'product.banner.add_to_cart' | t | default: 'Add to cart' }}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<style>
+/* layout */
+.bp{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start;border:1px solid #eee;border-radius:16px;padding:16px;background:#fff}
+@media (max-width: 860px){.bp{grid-template-columns:1fr}}
+
+/* media */
+.bp__media img{display:block;width:100%;height:auto;border-radius:12px;background:#f6f6f6}
+.bp__thumbs{display:flex;gap:8px;margin-top:12px}
+.bp__thumb{border:1px solid #eee;border-radius:10px;padding:0;background:#fff;cursor:pointer}
+.bp__thumb img{display:block;border-radius:8px}
+
+/* title & price */
+.bp__title{margin:0 0 4px;font-size:24px;line-height:1.25;font-weight:600}
+.bp__price{display:flex;gap:8px;align-items:baseline;margin:6px 0 8px}
+.bp__price--new,.bp__price--regular{font-weight:700;font-size:18px}
+.bp__price--old{opacity:.6}
+
+/* swatches (as thumbnails) */
+.bp__label{font-size:14px;margin:8px 0 6px;color:#666}
+.bp__swatches{display:flex;gap:10px;flex-wrap:wrap}
+.bp__swatch{position:relative;cursor:pointer;transition:box-shadow .15s}
+.bp__swatch--thumb{border:1px solid #ccc;border-radius:10px;padding:2px;background:#fff}
+.bp__swatch--thumb img{display:block;width:72px;height:72px;object-fit:cover;border-radius:8px}
+.bp__swatch.is-active{outline:2px solid #111;outline-offset:2px}
+.bp__swatch-label{position:absolute;left:-9999px}
+
+/* sizes */
+.bp__sizes{margin-top:6px}
+.bp__sizes-list{display:flex;gap:8px;flex-wrap:wrap}
+.bp__size{min-width:72px;padding:.5rem .75rem;border:1px solid #ddd;border-radius:10px;background:#fff;cursor:pointer}
+.bp__size.is-active{border-color:#111;box-shadow:0 0 0 2px #111 inset}
+.bp__size.is-disabled{opacity:.45;cursor:not-allowed}
+
+/* stock + CTA */
+.bp__stock{font-size:14px;color:#333;margin-top:6px;min-height:20px}
+.bp__cta{margin-top:10px}
+.bp__add{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:#111;color:#fff;border-radius:10px;padding:.7rem 1.1rem;text-decoration:none;font-weight:600}
+</style>
+
+<script>
+(function(){
+  var root = document.currentScript.closest('.bp');
+  if(!root) return;
+
+  var mainImg   = root.querySelector('.bp__media img');
+  var stockEl   = root.querySelector('[data-stock]');
+  var swatches  = root.querySelectorAll('.bp__swatch');
+  var addBtn    = root.querySelector('.bp__add');
+  var sizesWrap = root.querySelector('[data-sizes]');
+  var sizesList = root.querySelector('.bp__sizes-list');
+
+  function setActive(list, btn){
+    list.forEach(function(b){ b.classList.remove('is-active'); });
+    btn.classList.add('is-active');
+  }
+
+  function updateStockFromData(qty, available, invTracked){
+    var notAvailableText   = {{ "product.banner.not_available"        | t | default: "Not available" | json }};
+    var availableWithCount = {{ "product.banner.available_with_count" | t | default: "Available: __count__" | json }};
+    var availableGeneric   = {{ "product.banner.available"            | t | default: "Available" | json }};
+    var text = '';
+    if(invTracked){
+      if(isNaN(qty) || qty <= 0){ text = notAvailableText; }
+      else { text = availableWithCount.replace('__count__', qty); }
+    } else {
+      text = (available === true || available === 'true') ? availableGeneric : notAvailableText;
+    }
+    stockEl.textContent = text;
+  }
+
+  function renderSizes(btn){
+    // parse sizes JSON from data-sizes (array of {id,label,qty,available,invTracked,image})
+    var sizes = [];
+    try { sizes = JSON.parse(btn.dataset.sizes || '[]'); } catch(e){}
+    sizesList.innerHTML = '';
+    sizesWrap.hidden = (sizes.length === 0);
+
+    if(sizes.length === 0){
+      // if нет размеров — делаем ссылку на вариант цвета
+      if(addBtn && btn.dataset.variantId){
+        addBtn.href = '{{ routes.cart_add_url }}?id=' + btn.dataset.variantId + '&quantity=1';
+      }
+      return;
+    }
+
+    sizes.forEach(function(s){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'bp__size';
+      b.textContent = s.label;
+      b.dataset.variantId = s.id;
+      b.dataset.qty = String(s.qty || 0);
+      b.dataset.available = String(s.available);
+      b.dataset.invTracked = String(!!s.invTracked);
+      b.dataset.image = s.image || '';
+
+      if((s.invTracked && (!s.qty || s.qty <= 0)) || (s.invTracked === null && s.available === false)){
+        b.disabled = true;
+        b.classList.add('is-disabled');
       }
 
-      /* Media: thumbs left, big image right */
-      .bp__media{
-        display:grid;
-        grid-template-columns: 96px 1fr;
-        gap:16px;
-      }
-      .bp__media > img{
-        grid-column:2;
-        width:100%;
-        height:auto;
-        display:block;
-        border-radius:12px;
-        background:#f6f6f6;
-      }
-      .bp__thumbs{ grid-column:1; display:flex; flex-direction:column; gap:12px; }
-      .bp__thumb{
-        border:1px solid #eee; border-radius:10px; padding:0; background:#fff; cursor:pointer;
-        width:96px; height:72px; display:block; overflow:hidden;
-      }
-      .bp__thumb img{ width:100%; height:100%; object-fit:cover; display:block; border-radius:8px; }
+      b.addEventListener('click', function(){
+        setActive(sizesList.querySelectorAll('.bp__size'), b);
+        // stock text
+        updateStockFromData(parseInt(b.dataset.qty,10), (b.dataset.available === 'true'), (b.dataset.invTracked === 'true'));
+        // image
+        if(mainImg && b.dataset.image){ mainImg.src = b.dataset.image; }
+        // add-to-cart link
+        if(addBtn){ addBtn.href = '{{ routes.cart_add_url }}?id=' + b.dataset.variantId + '&quantity=1'; }
+      });
 
-      /* Title & price */
-      .bp__title{ margin:0 0 8px; font-size:36px; line-height:1.2; font-weight:600; }
-      .bp__price{ display:flex; gap:12px; align-items:baseline; margin:4px 0 16px; }
-      .bp__price--new,.bp__price--regular{ font-weight:700; font-size:20px; }
-      .bp__price--old{ opacity:.55; }
+      sizesList.appendChild(b);
+    });
+  }
 
-      /* Badge (optional) */
-      .bp__badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; background:#eef; font-size:12px; }
+  // main swatch click
+  swatches.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      setActive(swatches, btn);
+      // switch hero image to color preview
+      var img = btn.getAttribute('data-image');
+      if(mainImg && img){ mainImg.src = img; }
+      // when color changes — rebuild sizes
+      renderSizes(btn);
+      // also reset stock text (until выберут размер)
+      stockEl.textContent = {{ "product.banner.select_size" | t | default: "Select size" | json }};
+    });
+  });
 
-      /* Swatches */
-      .bp__label{ font-size:14px; margin:8px 0 8px; color:#666; }
-      .bp__swatches{ display:flex; gap:12px; flex-wrap:wrap; }
-      .bp__swatch{ min-width:36px; height:36px; border-radius:999px; border:1px solid #ccc; display:inline-flex; align-items:center; justify-content:center; background:#fff; position:relative; cursor:pointer; transition:box-shadow .15s; }
-      .bp__swatch-dot{ width:24px; height:24px; border-radius:999px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08); background:var(--c,#f3f3f3); display:block; }
-      .bp__swatch.is-active{ outline:2px solid #111; outline-offset:2px; }
-      .bp__swatch.is-disabled{ opacity:.45; cursor:not-allowed; }
+  // thumbs below hero
+  root.querySelectorAll('.bp__thumb').forEach(function(th){
+    th.addEventListener('click', function(){
+      var src = th.getAttribute('data-image');
+      if(mainImg && src){ mainImg.src = src; }
+    });
+  });
 
-      /* Stock & CTA */
-      .bp__stock{ font-size:14px; color:#333; margin-top:10px; min-height:20px; }
-      .bp__cta{ margin-top:20px; }
-      .bp__add{ display:inline-flex; align-items:center; justify-content:center; width:100%; height:56px; background:#111; color:#fff; border-radius:10px; padding:0 20px; text-decoration:none; font-weight:600; }
+  // auto-choose first color
+  if(swatches[0]){ swatches[0].click(); }
+})();
+</script>
 
-      /* Color helpers */
-      .bp__swatch[data-color*="black" i] .bp__swatch-dot{ --c:#000; }
-      .bp__swatch[data-color*="white" i] .bp__swatch-dot{ --c:#fff; }
-      .bp__swatch[data-color*="red"   i] .bp__swatch-dot{ --c:#e11; }
-      .bp__swatch[data-color*="blue"  i] .bp__swatch-dot{ --c:#39f; }
-      .bp__swatch[data-color*="green" i] .bp__swatch-dot{ --c:#3c6; }
-      .bp__swatch[data-color*="beige" i] .bp__swatch-dot{ --c:#e6d8c3; }
-      .bp__swatch[data-color*="grey" i],
-      .bp__swatch[data-color*="gray" i] .bp__swatch-dot{ --c:#bbb; }
-
-      /* Responsive */
-      @media (max-width: 1024px){
-        .bp{ grid-template-columns: 1fr; }
-        .bp__media{ grid-template-columns: 84px 1fr; }
-      }
-      @media (max-width: 640px){
-        .bp__title{ font-size:28px; }
-      }
-    </style>
-
-    <script>
-      (function(){
-        var root = document.currentScript.closest('.bp');
-        if(!root) return;
-
-        var stockEl  = root.querySelector('[data-stock]');
-        var mainImg  = root.querySelector('.bp__media img');
-        var swatches = root.querySelectorAll('.bp__swatch');
-
-        function setActive(btn){
-          swatches.forEach(function(b){ b.classList.remove('is-active'); });
-          btn.classList.add('is-active');
-        }
-
-        function updateStock(btn){
-          var qty        = parseInt(btn.dataset.qty, 10);
-          var available  = (btn.dataset.available === 'true');
-          var invTracked = (btn.dataset.invTracked === 'true');
-
-          var notAvailableText   = {{ "product.banner.not_available"        | t | default: "Not available"        | json }};
-          var availableWithCount = {{ "product.banner.available_with_count" | t | default: "Available: __count__" | json }};
-          var availableGeneric   = {{ "product.banner.available"            | t | default: "In stock"              | json }};
-
-          var text = '';
-          if(invTracked){
-            if(isNaN(qty) || qty <= 0){ text = notAvailableText; }
-            else { text = availableWithCount.replace('__count__', qty); }
-          } else {
-            text = available ? availableGeneric : notAvailableText;
-          }
-          stockEl.textContent = text;
-        }
-
-        function switchImage(btn){
-          var src = btn.dataset.image;
-          if(mainImg && src){ mainImg.src = src; }
-        }
-
-        swatches.forEach(function(btn){
-          btn.addEventListener('click', function(){
-            if(btn.classList.contains('is-disabled')) return;
-            setActive(btn);
-            updateStock(btn);
-            switchImage(btn);
-          });
-        });
-
-        // Thumbnails click
-        root.querySelectorAll('.bp__thumb').forEach(function(th){
-          th.addEventListener('click', function(){
-            var src = th.getAttribute('data-image');
-            if(mainImg && src){ mainImg.src = src; }
-          });
-        });
-
-        // Preselect first swatch
-        if(swatches[0]){ swatches[0].click(); }
-      })();
-    </script>
-
-  {%- endif -%}
-{%- endif -%}
+{%- endif -%} {# color_index check #}
+{%- endif -%} {# product exists #}
