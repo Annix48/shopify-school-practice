@@ -18,9 +18,7 @@
 {%- if _p == null -%}
   <div class="bp bp--error" style="padding:1rem;border:1px dashed #ddd;border-radius:.75rem">
     {{
-      'product.banner.missing_product'
-      | t
-      | default: 'Не вдалося завантажити продукт: передайте product або handle.'
+      'product.banner.missing_product' | t | default: 'Не вдалося завантажити продукт: передайте product або handle.'
     }}
   </div>
   {%- break -%}

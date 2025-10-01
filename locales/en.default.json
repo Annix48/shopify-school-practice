@@ -116,6 +116,15 @@
     "collection_title": "Your collection's name"
   },
   "products": {
+        "banner": {
+      "missing_product": "Failed to load product: please pass product or handle.",
+      "not_available": "Not available",
+      "available": "Available",
+      "available_with_count": "Available: __count__",
+      "select_color": "Select color",
+      "add_to_cart": "Add to cart"
+    },
+
     "product": {
       "add_to_cart": "Add to cart",
       "choose_options": "Choose options",
@@ -130,14 +139,7 @@
       "sku": "SKU",
       "on_sale": "Sale",
       "product_variants": "Product variants",
-       "banner": {
-      "missing_product": "Failed to load product: please pass product or handle.",
-      "not_available": "Not available",
-      "available": "Available",
-      "available_with_count": "Available: __count__",
-      "select_color": "Select color",
-      "add_to_cart": "Add to cart"
-    },
+
     "modal": {
       "label": "Media gallery"
     },
