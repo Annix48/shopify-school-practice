@@ -29,20 +29,20 @@
   endif
 -%}  
 
-  capture price_html
-    {%- if _product.price -%}
-      {%- assign current_price = _product.price -%}
-      {%- assign compare_price = _product.compare_at_price -%}
-      <div class="bp-price">
-        {%- if compare_price and compare_price > current_price -%}
-          <span class="bp-price__now">{{ current_price | money }}</span>
-          <span class="bp-price__old"><s>{{ compare_price | money }}</s></span>
-        {%- else -%}
-          <span class="bp-price__now">{{ current_price | money }}</span>
-        {%- endif -%}
-      </div>
-    {%- endif -%}
-  endcapture
+ {%- capture price_html -%}
+  {%- if _product.price -%}
+    {%- assign current_price = _product.price -%}
+    {%- assign compare_price = _product.compare_at_price -%}
+    <div class="bp-price">
+      {%- if compare_price and compare_price > current_price -%}
+        <span class="bp-price__now">{{ current_price | money }}</span>
+        <span class="bp-price__old"><s>{{ compare_price | money }}</s></span>
+      {%- else -%}
+        <span class="bp-price__now">{{ current_price | money }}</span>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
 
   assign main_image = _product.featured_image | default: _product.images.first
 -%}
