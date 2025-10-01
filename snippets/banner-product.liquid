@@ -62,13 +62,18 @@
 
 {%- capture price_block -%}
   {%- if main_variant and main_variant.price -%}
-    {%- assign has_sale = main_variant.compare_at_price and main_variant.compare_at_price > main_variant.price -%}
     <div class="bp__price" style="display:flex;gap:.5rem;align-items:baseline">
-      {%- if has_sale -%}
-        <span class="bp__price--new" style="font-weight:700">{{ main_variant.price | money_without_trailing_zeros }}</span>
-        <s class="bp__price--old" aria-label="{{ 'product.banner.old_price' | t | default: 'Стара ціна' }}">{{ main_variant.compare_at_price | money_without_trailing_zeros }}</s>
+      {%- if main_variant.compare_at_price and main_variant.compare_at_price > main_variant.price -%}
+        <span class="bp__price--new" style="font-weight:700">
+          {{ main_variant.price | money_without_trailing_zeros }}
+        </span>
+        <s class="bp__price--old" aria-label="{{ 'product.banner.old_price' | t | default: 'Стара ціна' }}">
+          {{ main_variant.compare_at_price | money_without_trailing_zeros }}
+        </s>
       {%- else -%}
-        <span class="bp__price--regular" style="font-weight:700">{{ main_variant.price | money_without_trailing_zeros }}</span>
+        <span class="bp__price--regular" style="font-weight:700">
+          {{ main_variant.price | money_without_trailing_zeros }}
+        </span>
       {%- endif -%}
     </div>
   {%- endif -%}
@@ -133,7 +138,6 @@
         {%- assign printed = 0 -%}
         {%- for color in colors_uniq -%}
           {%- if color == blank -%}{%- continue -%}{%- endif -%}
-          {%- assign colorLc = color | downcase -%}
           {%- case color_index -%}
             {%- when 1 -%}{%- assign matched = variants | where: 'option1', color -%}
             {%- when 2 -%}{%- assign matched = variants | where: 'option2', color -%}
@@ -145,9 +149,7 @@
           {%- assign qty = v.inventory_quantity | default: 0 -%}
           {%- assign inv_tracked = v.inventory_quantity != null -%}
           {%- assign available_flag = v.available -%}
-
-          {%- assign demoForceUnavailable = false -%}
-          {%- assign is_unavailable = (inv_tracked and qty == 0) or (inv_tracked == false and available_flag == false) or demoForceUnavailable -%}
+          {%- assign is_unavailable = (inv_tracked and qty == 0) or (inv_tracked == false and available_flag == false) -%}
 
           <button
             type="button"
@@ -265,4 +267,4 @@
 })();
 </script>
 {%- endif -%}
-{%- endif -%}  
+{%- endif -%}
