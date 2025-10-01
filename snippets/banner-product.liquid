@@ -289,7 +289,7 @@
           var notAvailableText   = {{ "product.banner.not_available"        | t | default: "не доступно"        | json }};
  var availableWithCount = {{ "product.banner.available_with_count" 
   | t 
-  | default: "Доступно: PLACEHOLDER_COUNT" 
+  | default: "Доступно: __count__" 
   | json }};
 
   var availableGeneric   = {{ "product.banner.available"            | t | default: "У наявності"        | json }};
@@ -300,7 +300,8 @@
             if(isNaN(qty) || qty <= 0){
               text = notAvailableText;
             } else {
-             text = availableWithCount.replace('PLACEHOLDER_COUNT', qty);
+             text = availableWithCount.replace('__count__', qty);
+
 
             }
           } else {
