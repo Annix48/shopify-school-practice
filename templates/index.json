@@ -92,7 +92,7 @@
       "type": "custom-liquid",
       "name": "Product",
       "settings": {
-        "custom_liquid": "{% render 'banner-product', product: product %}\n{% render 'banner-product', handle: 'nike-air-max-plus' %}",
+        "custom_liquid": "{% render 'banner-product', product: product %}",
         "color_scheme": "scheme-1",
         "padding_top": 40,
         "padding_bottom": 52
