@@ -100,6 +100,40 @@
     <h1 class="bp__title">{{ title_safe }}</h1>
     {{- price_block -}}
 
+
+{%- assign simulate_oos_color = 'black' | downcase -%}
+
+{%- for vv in color_variants -%}
+  {%- case size_index -%}
+    {%- when 1 -%}{%- assign size_label = vv.option1 -%}
+    {%- when 2 -%}{%- assign size_label = vv.option2 -%}
+    {%- when 3 -%}{%- assign size_label = vv.option3 -%}
+  {%- endcase -%}
+
+  {%- comment -%} Базовые значения из варианта {%- endcomment -%}
+  {%- assign qty_val = vv.inventory_quantity | default: 0 -%}
+  {%- assign available_val = vv.available -%}
+
+  {%- comment -%}
+    Симуляция OOS: если название текущего цвета совпадает с simulate_oos_color,
+    выставляем 0 и false (только в UI).
+  {%- endcomment -%}
+  {%- if simulate_oos_color != blank and color | downcase == simulate_oos_color -%}
+    {%- assign qty_val = 0 -%}
+    {%- assign available_val = false -%}
+  {%- endif -%}
+
+  {
+    "id": {{ vv.id }},
+    "label": {{ size_label | json }},
+    "qty": {{ qty_val }},
+    "available": {{ available_val | json }},
+    "invTracked": {% if vv.inventory_management %}true{% else %}false{% endif %},
+    "image": {{ vv.image | default: featured_image | image_url: width: 1200 | json }}
+  }{%- if forloop.last == false -%},{%- endif -%}
+{%- endfor -%}
+
+
     {%- comment %} COLORS (thumbnails with images) {%- endcomment %}
     <div class="bp__colors">
       <div class="bp__label">{{ 'products.banner.select_color' | t | default: 'Select color' }}</div>
