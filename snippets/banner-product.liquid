@@ -127,7 +127,7 @@
                   "qty": {{ vv.inventory_quantity | default: 0 }},
                   "available": {{ vv.available | json }},
                   "invTracked": {{ vv.inventory_management | json }},
-                  "image": {{ (vv.image | default: hero_image) | image_url: width: 900 | json }}
+                  "image": {{ vv.image | default: featured_image | image_url: width: 900 | json }}
                 }{%- if forloop.last == false -%},{%- endif -%}
               {%- endfor -%}
             {%- endif -%}
