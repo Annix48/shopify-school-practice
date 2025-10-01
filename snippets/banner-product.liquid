@@ -170,9 +170,18 @@
    
 
     {%- comment %} SIZES (dynamic, per color) {%- endcomment %}
-    <div class="bp__sizes" data-sizes hidden>
-      <div class="bp__sizes-list"></div>
-    </div>
+<div class="bp__sizes" data-sizes>
+  <div class="bp__sizes-list">
+    <!-- Дефолтный набор как в макете; JS перерисует при выборе цвета -->
+    <button type="button" class="bp__size">UK 5.5</button>
+    <button type="button" class="bp__size">UK 6 (EU 39)</button>
+    <button type="button" class="bp__size">UK 6 (EU 40)</button>
+    <button type="button" class="bp__size">UK 6.5</button>
+    <button type="button" class="bp__size">UK 7</button>
+    <button type="button" class="bp__size">UK 7.5</button>
+  </div>
+</div>
+
 
     {%- if main_variant -%}
       <a href="{{ routes.cart_add_url }}?id={{ main_variant.id }}&quantity=1" class="bp__add">
