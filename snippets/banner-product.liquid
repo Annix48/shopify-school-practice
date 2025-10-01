@@ -168,8 +168,8 @@
     <!-- CTA -->
     {%- if main_variant -%}
       <div class="bp__cta">
-        <a href="{{ routes.cart_add_url }}?id={{ main_variant.id }}&quantity=1" class="bp__add">
-          {{ 'products.banner.add_to_cart' | t | default: 'Add to cart' }}
+        <a href="{{ routes.bag_add_url }}?id={{ main_variant.id }}&quantity=1" class="bp__add">
+          {{ 'products.banner.add_to_bag' | t | default: 'Add to bag' }}
         </a>
       </div>
     {%- endif -%}
@@ -233,9 +233,9 @@
   }
 
   function updateStockFromData(qty, available, invTracked){
-    var notAvailableText   = {{ "product.banner.not_available"        | t | default: "Not available" | json }};
-    var availableWithCount = {{ "product.banner.available_with_count" | t | default: "Available: __count__" | json }};
-    var availableGeneric   = {{ "product.banner.available"            | t | default: "Available" | json }};
+    var notAvailableText   = {{ "products.banner.not_available"        | t | default: "Not available" | json }};
+    var availableWithCount = {{ "products.banner.available_with_count" | t | default: "Available: __count__" | json }};
+    var availableGeneric   = {{ "products.banner.available"            | t | default: "Available" | json }};
     var text = '';
     if(invTracked){
       if(isNaN(qty) || qty <= 0){ text = notAvailableText; }
@@ -256,7 +256,7 @@
     if(sizes.length === 0){
       // if нет размеров — делаем ссылку на вариант цвета
       if(addBtn && btn.dataset.variantId){
-        addBtn.href = '{{ routes.cart_add_url }}?id=' + btn.dataset.variantId + '&quantity=1';
+        addBtn.href = '{{ routes.bag_add_url }}?id=' + btn.dataset.variantId + '&quantity=1';
       }
       return;
     }
@@ -284,7 +284,7 @@
         // image
         if(mainImg && b.dataset.image){ mainImg.src = b.dataset.image; }
         // add-to-cart link
-        if(addBtn){ addBtn.href = '{{ routes.cart_add_url }}?id=' + b.dataset.variantId + '&quantity=1'; }
+        if(addBtn){ addBtn.href = '{{ routes.bag_add_url }}?id=' + b.dataset.variantId + '&quantity=1'; }
       });
 
       sizesList.appendChild(b);
@@ -298,7 +298,7 @@
       var img = btn.getAttribute('data-image');
       if(mainImg && img){ mainImg.src = img; }
       renderSizes(btn);
-      stockEl.textContent = {{ "product.banner.select_size" | t | default: "Select size" | json }};
+      stockEl.textContent = {{ "products.banner.select_size" | t | default: "Select size" | json }};
     });
   });
 
