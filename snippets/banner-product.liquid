@@ -1,5 +1,9 @@
-{% comment %}
-  
+{% comment %} 
+  Universal product banner
+  Usage:
+    {% render 'banner-product', handle: 'nike-air-max-plus' %}
+    or (inside loops)
+    {% render 'banner-product', product: product %}
 {% endcomment %}
 {%- assign current_product = product | default: null -%}
 {%- if current_product == null and handle -%}
@@ -317,5 +321,5 @@
 })();
 </script>
 
-{%- endif -%} {# color_index check #}
-{%- endif -%} {# product exists #}
+{%- endif -%} 
+{%- endif -%} 
