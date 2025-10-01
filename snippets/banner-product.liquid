@@ -1,4 +1,4 @@
-{%- comment -%}
+{% comment %}
   File: snippets/banner-product.liquid
 
   Usage examples:
@@ -8,7 +8,7 @@
   Notes:
   - Prefer passing a stable `handle` to avoid scope issues.
   - all_products has a request limit — do not overuse it site-wide.
-{%- endcomment -%}
+{% endcomment %}
 
 {%- assign current_product = product | default: null -%}
 {%- if current_product == null and handle -%}
@@ -160,16 +160,17 @@
               {%- assign v = matched.first -%}
               {%- if v == null -%}{%- continue -%}{%- endif -%}
 
-              {%- assign qty = v.inventory_quantity | default: 0 -%}
-              {%- assign inv_tracked = v.inventory_quantity != null -%}
-              {%- assign available_flag = v.available -%}
+             {%- assign qty            = v.inventory_quantity | default: 0 -%}
+{%- assign inv_tracked    = v.inventory_management != nil -%}  {# было: != null #}
+{%- assign available_flag = v.available -%}
 
-              {%- assign is_unavailable = false -%}
-              {%- if inv_tracked and qty == 0 -%}
-                {%- assign is_unavailable = true -%}
-              {%- elsif inv_tracked == false and available_flag == false -%}
-                {%- assign is_unavailable = true -%}
-              {%- endif -%}
+{%- assign is_unavailable = false -%}
+{%- if inv_tracked and qty == 0 -%}
+  {%- assign is_unavailable = true -%}
+{%- elsif inv_tracked == false and available_flag == false -%}
+  {%- assign is_unavailable = true -%}
+{%- endif -%}
+
 
               <button
                 type="button"

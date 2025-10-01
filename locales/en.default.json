@@ -115,6 +115,8 @@
   },
   "product": {
     "banner": {
+          "no_color_option": "No Color option found for this product. Palette not shown.",
+
       "missing_product": "Failed to load product: please pass product or handle.",
       "not_available": "Not available",
       "available": "Available",
