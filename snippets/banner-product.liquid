@@ -1,10 +1,11 @@
-{% comment %} 
+{% comment %}
   Universal product banner
   Usage:
     {% render 'banner-product', handle: 'nike-air-max-plus' %}
     or (inside loops)
     {% render 'banner-product', product: product %}
 {% endcomment %}
+
 {%- assign current_product = product | default: null -%}
 {%- if current_product == null and handle -%}
   {%- assign current_product = all_products[handle] -%}
@@ -18,8 +19,9 @@
 
 {%- assign featured_image = current_product.featured_image -%}
 {%- assign title_safe = current_product.title | escape -%}
+{%- assign hero_alt = featured_image.alt | default: title_safe -%}
 
-
+{%- comment %} ---- find option indexes: color & size ---- {%- endcomment %}
 {%- assign color_index = 0 -%}
 {%- assign size_index  = 0 -%}
 {%- for opt in current_product.options_with_values -%}
@@ -32,7 +34,6 @@
 {%- endfor -%}
 {%- if color_index == 0 and current_product.options.size > 0 -%}{%- assign color_index = 1 -%}{%- endif -%}
 
-
 {%- if color_index == 0 -%}
   <div class="bp">
     <div class="bp__head"><strong>{{ title_safe }}</strong></div>
@@ -42,7 +43,6 @@
   </div>
 {%- else -%}
 
-
 {%- case color_index -%}
   {%- when 1 -%}{%- assign colors_all = current_product.variants | map: 'option1' -%}
   {%- when 2 -%}{%- assign colors_all = current_product.variants | map: 'option2' -%}
@@ -50,14 +50,16 @@
 {%- endcase -%}
 {%- assign colors_uniq = colors_all | uniq -%}
 
-{% comment %} main variant and price block{% endcomment %}
+{%- comment %} ---- main variant & price block ---- {%- endcomment %}
 {%- assign main_variant = current_product.selected_or_first_available_variant | default: current_product.variants.first -%}
 {%- capture price_block -%}
   {%- if main_variant and main_variant.price -%}
     <div class="bp__price">
       {%- if main_variant.compare_at_price and main_variant.compare_at_price > main_variant.price -%}
         <span class="bp__price--new">{{ main_variant.price | money_without_trailing_zeros }}</span>
-        <s class="bp__price--old" aria-label="{{ 'products.banner.old_price' | t | default: 'Old price' }}">{{ main_variant.compare_at_price | money_without_trailing_zeros }}</s>
+        <s class="bp__price--old" aria-label="{{ 'products.banner.old_price' | t | default: 'Old price' }}">
+          {{ main_variant.compare_at_price | money_without_trailing_zeros }}
+        </s>
       {%- else -%}
         <span class="bp__price--regular">{{ main_variant.price | money_without_trailing_zeros }}</span>
       {%- endif -%}
@@ -68,32 +70,37 @@
 {%- assign variants = current_product.variants -%}
 
 <div class="bp" data-product-id="{{ current_product.id }}">
+  {%- comment %} LEFT: media with vertical thumbs {%- endcomment %}
   <div class="bp__media">
-    {%- if featured_image -%}
-      {{ featured_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: featured_image.alt | default: title_safe }}
-    {%- else -%}
-      {{ 'image' | placeholder_svg_tag: 'bp__placeholder' }}
-    {%- endif -%}
-
     {%- if current_product.images.size > 1 -%}
       <div class="bp__thumbs">
-        {%- for img in current_product.images limit:3 -%}
-          <button type="button" class="bp__thumb" data-image="{{ img | image_url: width: 900 }}">
-            {{ img | image_url: width: 96 | image_tag: loading: 'lazy', alt: img.alt | default: title_safe }}
+        {%- for img in current_product.images -%}
+          <button type="button" class="bp__thumb" data-image="{{ img | image_url: width: 1200 }}">
+            {{ img | image_url: width: 120 | image_tag: loading: 'lazy', alt: img.alt | default: title_safe }}
           </button>
         {%- endfor -%}
       </div>
     {%- endif -%}
+
+    <div class="bp__hero">
+      {%- if featured_image -%}
+        {{ featured_image | image_url: width: 1400 | image_tag: loading: 'lazy', alt: hero_alt }}
+      {%- else -%}
+        {{ 'image' | placeholder_svg_tag: 'bp__placeholder' }}
+      {%- endif -%}
+      <div class="bp__chip">
+        <span class="bp__chip-dot">★</span>
+        {{ 'Highly Rated' }}
+      </div>
+    </div>
   </div>
 
+  {%- comment %} RIGHT: content {%- endcomment %}
   <div class="bp__content">
-    <div class="bp__top">
-      <h3 class="bp__title">{{ title_safe }}</h3>
-    </div>
-
+    <h1 class="bp__title">{{ title_safe }}</h1>
     {{- price_block -}}
 
-    <!-- COLORS (thumbnails with images) -->
+    {%- comment %} COLORS (thumbnails with images) {%- endcomment %}
     <div class="bp__colors">
       <div class="bp__label">{{ 'products.banner.select_color' | t | default: 'Select color' }}</div>
       <div class="bp__swatches" role="list">
@@ -101,7 +108,6 @@
         {%- for color in colors_uniq -%}
           {%- if color == blank -%}{%- continue -%}{%- endif -%}
 
-          {%- comment -%} all variants for this color {%- endcomment -%}
           {%- case color_index -%}
             {%- when 1 -%}{%- assign color_variants = variants | where: 'option1', color -%}
             {%- when 2 -%}{%- assign color_variants = variants | where: 'option2', color -%}
@@ -113,9 +119,6 @@
 
           {%- assign hero_image = v.image | default: featured_image -%}
 
-          {%- comment -%}
-            build sizes JSON for this color (if size option exists)
-          {%- endcomment -%}
           {%- capture sizes_json -%}
             [
             {%- if size_index > 0 -%}
@@ -130,8 +133,8 @@
                   "label": {{ size_label | json }},
                   "qty": {{ vv.inventory_quantity | default: 0 }},
                   "available": {{ vv.available | json }},
-                  "invTracked": {{ vv.inventory_management | json }},
-                  "image": {{ vv.image | default: featured_image | image_url: width: 900 | json }}
+                  "invTracked": {{ vv.inventory_management != blank | json }},
+                  "image": {{ vv.image | default: featured_image | image_url: width: 1200 | json }}
                 }{%- if forloop.last == false -%},{%- endif -%}
               {%- endfor -%}
             {%- endif -%}
@@ -143,13 +146,13 @@
             role="listitem"
             class="bp__swatch bp__swatch--thumb"
             data-variant-id="{{ v.id }}"
-            data-image="{{ hero_image | image_url: width: 900 }}"
+            data-image="{{ hero_image | image_url: width: 1200 }}"
             data-sizes='{{ sizes_json | strip | escape }}'
             aria-label="{{ color | escape }}"
             title="{{ color | escape }}"
           >
             {%- if hero_image -%}
-              {{ hero_image | image_url: width: 72 | image_tag: loading: 'lazy', alt: color }}
+              {{ hero_image | image_url: width: 180 | image_tag: loading: 'lazy', alt: color }}
             {%- else -%}
               <span class="bp__swatch-dot" aria-hidden="true"></span>
             {%- endif -%}
@@ -162,63 +165,140 @@
       </div>
     </div>
 
-    <!-- STOCK LINE -->
+    {%- comment %} STOCK LINE {%- endcomment %}
+    <div class="bp__label bp__label--spaced">Select Size:</div>
     <div class="bp__stock" data-stock>{{ 'products.banner.select_color' | t | default: 'Select color' }}</div>
 
-    <!-- SIZES (dynamic, per color) -->
+    {%- comment %} SIZES (dynamic, per color) {%- endcomment %}
     <div class="bp__sizes" data-sizes hidden>
-      <div class="bp__label">{{ 'products.banner.select_size' | t | default: 'Select size' }}</div>
       <div class="bp__sizes-list"></div>
     </div>
 
-    <!-- CTA -->
     {%- if main_variant -%}
-      <div class="bp__cta">
-        <a href="{{ routes.bag_add_url }}?id={{ main_variant.id }}&quantity=1" class="bp__add">
-          {{ 'products.banner.add_to_bag' | t | default: 'Add to bag' }}
-        </a>
-      </div>
+      <a href="{{ routes.cart_add_url }}?id={{ main_variant.id }}&quantity=1" class="bp__add">
+        {{ 'products.banner.add_to_bag' | t | default: 'Add To Bag' }}
+      </a>
     {%- endif -%}
+
+    <p class="bp__note">
+      Let your attitude have the edge in your Nike Air Max Plus, a Tuned Air experience that
+      offers premium stability and unbelievable cushioning.
+    </p>
   </div>
 </div>
 
 <style>
-{% comment %} layout {% endcomment %}
-.bp{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start;border:1px solid #eee;border-radius:16px;padding:16px;background:#fff}
-@media (max-width: 860px){.bp{grid-template-columns:1fr}}
+/* ===== Layout ===== */
+.bp{
+  --bp-radius: 16px;
+  --bp-border: #eee;
+  --bp-muted: #666;
+  --bp-black: #111;
+  --bp-bg-soft: #f5f5f5;
 
-{% comment %} media {% endcomment %}
-.bp__media img{display:block;width:100%;height:auto;border-radius:12px;background:#f6f6f6}
-.bp__thumbs{display:flex;gap:8px;margin-top:12px}
-.bp__thumb{border:1px solid #eee;border-radius:10px;padding:0;background:#fff;cursor:pointer}
-.bp__thumb img{display:block;border-radius:8px}
+  display:grid;
+  grid-template-columns: 560px 1fr;
+  gap: 40px;
+  padding: 28px;
+  background:#fff;
+  border:1px solid var(--bp-border);
+  border-radius: var(--bp-radius);
+}
+@media (max-width: 1100px){
+  .bp{ grid-template-columns:1fr; }
+}
 
-{% comment %} title & price {% endcomment %}
-.bp__title{margin:0 0 4px;font-size:24px;line-height:1.25;font-weight:600}
-.bp__price{display:flex;gap:8px;align-items:baseline;margin:6px 0 8px}
-.bp__price--new,.bp__price--regular{font-weight:700;font-size:18px}
-.bp__price--old{opacity:.6}
+/* ===== Media area (thumbs left, hero right) ===== */
+.bp__media{
+  display:grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+  align-items:start;
+}
+.bp__thumbs{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  max-height: 620px;
+  overflow:auto;
+  padding-right:2px;
+}
+.bp__thumb{
+  display:block;
+  padding:0;
+  border:1px solid var(--bp-border);
+  border-radius:12px;
+  background:#fff;
+  cursor:pointer;
+  transition:box-shadow .15s, border-color .15s;
+}
+.bp__thumb img{ display:block; border-radius:10px; }
+.bp__thumb:focus-visible{ outline:2px solid var(--bp-black); outline-offset:2px; }
 
-{% comment %} swatches (as thumbnails) {% endcomment %}
-.bp__label{font-size:14px;margin:8px 0 6px;color:#666}
-.bp__swatches{display:flex;gap:10px;flex-wrap:wrap}
-.bp__swatch{position:relative;cursor:pointer;transition:box-shadow .15s}
-.bp__swatch--thumb{border:1px solid #ccc;border-radius:10px;padding:2px;background:#fff}
-.bp__swatch--thumb img{display:block;width:72px;height:72px;object-fit:cover;border-radius:8px}
-.bp__swatch.is-active{outline:2px solid #111;outline-offset:2px}
-.bp__swatch-label{position:absolute;left:-9999px}
+.bp__hero{
+  position:relative;
+  background:#f3f3f3;
+  border-radius:14px;
+  padding:16px;
+}
+.bp__hero img{
+  width:100%; height:auto; display:block; border-radius:12px; background:#f3f3f3;
+}
+.bp__chip{
+  position:absolute; left:16px; top:16px;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 10px; border-radius:10px; background:#fff; border:1px solid var(--bp-border);
+  font-size:14px;
+}
+.bp__chip-dot{ font-size:14px; }
 
-{% comment %} sizes {% endcomment %}
-.bp__sizes{margin-top:6px}
-.bp__sizes-list{display:flex;gap:8px;flex-wrap:wrap}
-.bp__size{min-width:72px;padding:.5rem .75rem;border:1px solid #ddd;border-radius:10px;background:#fff;cursor:pointer}
-.bp__size.is-active{border-color:#111;box-shadow:0 0 0 2px #111 inset}
-.bp__size.is-disabled{opacity:.45;cursor:not-allowed}
+/* ===== Title & price ===== */
+.bp__title{ margin:0 0 8px; font-size:36px; line-height:1.2; font-weight:700; }
+.bp__price{ display:flex; gap:10px; align-items:baseline; margin:6px 0 18px; }
+.bp__price--new,.bp__price--regular{ font-weight:700; font-size:20px; }
+.bp__price--old{ opacity:.55; }
 
+/* ===== Labels ===== */
+.bp__label{ font-size:14px; color:var(--bp-muted); margin:4px 0 8px; }
+.bp__label--spaced{ margin-top:18px; }
 
-.bp__stock{font-size:14px;color:#333;margin-top:6px;min-height:20px}
-.bp__cta{margin-top:10px}
-.bp__add{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:#111;color:#fff;border-radius:10px;padding:.7rem 1.1rem;text-decoration:none;font-weight:600}
+/* ===== Color swatches (as mini-cards) ===== */
+.bp__swatches{ display:flex; gap:12px; flex-wrap:wrap; }
+.bp__swatch{ position:relative; cursor:pointer; }
+.bp__swatch--thumb{
+  border:1px solid #ccc; border-radius:12px; background:#fff; padding:6px;
+  transition:border-color .15s, box-shadow .15s, transform .05s;
+}
+.bp__swatch--thumb img{
+  display:block; width:84px; height:84px; object-fit:cover; border-radius:10px;
+}
+.bp__swatch.is-active{ outline:2px solid var(--bp-black); outline-offset:3px; }
+.bp__swatch-label{ position:absolute; left:-9999px; }
+
+/* ===== Sizes ===== */
+.bp__sizes{ margin-top:10px; }
+.bp__sizes-list{ display:grid; grid-template-columns: repeat(3, minmax(160px,1fr)); gap:14px; }
+@media (max-width: 600px){ .bp__sizes-list{ grid-template-columns: repeat(2, minmax(140px,1fr)); } }
+.bp__size{
+  min-height:56px; padding:.8rem 1.2rem; border:1px solid #ddd; border-radius:12px;
+  background:#fff; cursor:pointer; font-weight:500;
+}
+.bp__size.is-active{ border-color:var(--bp-black); box-shadow:0 0 0 2px var(--bp-black) inset; }
+.bp__size.is-disabled{ opacity:.45; cursor:not-allowed; }
+
+/* ===== Stock line ===== */
+.bp__stock{ min-height:22px; font-size:14px; color:#333; }
+
+/* ===== CTA ===== */
+.bp__add{
+  display:block; width:100%; text-align:center; margin-top:18px;
+  background:var(--bp-black); color:#fff; text-decoration:none;
+  padding:1rem 1.2rem; border-radius:12px; font-weight:700; font-size:16px;
+}
+.bp__add:focus-visible{ outline:2px solid var(--bp-black); outline-offset:2px; }
+
+/* ===== Note ===== */
+.bp__note{ margin-top:16px; color:#555; line-height:1.6; }
 </style>
 
 <script>
@@ -226,7 +306,7 @@
   var root = document.currentScript.closest('.bp');
   if(!root) return;
 
-  var mainImg   = root.querySelector('.bp__media img');
+  var mainImg   = root.querySelector('.bp__hero img');
   var stockEl   = root.querySelector('[data-stock]');
   var swatches  = root.querySelectorAll('.bp__swatch');
   var addBtn    = root.querySelector('.bp__add');
@@ -253,16 +333,15 @@
   }
 
   function renderSizes(btn){
-    // parse sizes JSON from data-sizes (array of {id,label,qty,available,invTracked,image})
     var sizes = [];
     try { sizes = JSON.parse(btn.dataset.sizes || '[]'); } catch(e){}
     sizesList.innerHTML = '';
     sizesWrap.hidden = (sizes.length === 0);
 
     if(sizes.length === 0){
-      // if нет размеров — делаем ссылку на вариант цвета
+      // нет размеров — ведём прямо на цветовой вариант
       if(addBtn && btn.dataset.variantId){
-        addBtn.href = '{{ routes.bag_add_url }}?id=' + btn.dataset.variantId + '&quantity=1';
+        addBtn.href = '{{ routes.cart_add_url }}?id=' + btn.dataset.variantId + '&quantity=1';
       }
       return;
     }
@@ -274,30 +353,28 @@
       b.textContent = s.label;
       b.dataset.variantId = s.id;
       b.dataset.qty = String(s.qty || 0);
-      b.dataset.available = String(s.available);
+      b.dataset.available = String(!!s.available);
       b.dataset.invTracked = String(!!s.invTracked);
       b.dataset.image = s.image || '';
 
-      if((s.invTracked && (!s.qty || s.qty <= 0)) || (s.invTracked === null && s.available === false)){
+      // disabled state
+      if((s.invTracked && (!s.qty || s.qty <= 0)) || (!s.invTracked && s.available === false)){
         b.disabled = true;
         b.classList.add('is-disabled');
       }
 
       b.addEventListener('click', function(){
         setActive(sizesList.querySelectorAll('.bp__size'), b);
-        // stock text
         updateStockFromData(parseInt(b.dataset.qty,10), (b.dataset.available === 'true'), (b.dataset.invTracked === 'true'));
-        // image
         if(mainImg && b.dataset.image){ mainImg.src = b.dataset.image; }
-        // add-to-cart link
-        if(addBtn){ addBtn.href = '{{ routes.bag_add_url }}?id=' + b.dataset.variantId + '&quantity=1'; }
+        if(addBtn){ addBtn.href = '{{ routes.cart_add_url }}?id=' + b.dataset.variantId + '&quantity=1'; }
       });
 
       sizesList.appendChild(b);
     });
   }
 
-  
+  // color clicks
   swatches.forEach(function(btn){
     btn.addEventListener('click', function(){
       setActive(swatches, btn);
@@ -308,7 +385,7 @@
     });
   });
 
-  // thumbs below hero
+  // vertical thumbs (left)
   root.querySelectorAll('.bp__thumb').forEach(function(th){
     th.addEventListener('click', function(){
       var src = th.getAttribute('data-image');
@@ -316,10 +393,10 @@
     });
   });
 
-  // auto-choose first color
+  // auto-select first color
   if(swatches[0]){ swatches[0].click(); }
 })();
 </script>
 
-{%- endif -%} 
-{%- endif -%} 
+{%- endif -%}
+{%- endif -%}
