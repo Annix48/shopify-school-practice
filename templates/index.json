@@ -90,9 +90,9 @@
     },
     "custom_liquid_RGmfbz": {
       "type": "custom-liquid",
-      "name": "t:sections.custom-liquid.presets.name",
+      "name": "Product",
       "settings": {
-        "custom_liquid": "{% render 'banner-product', product: product %}",
+        "custom_liquid": "{% render 'banner-product', product: product %}\n{% render 'banner-product', handle: 'nike-air-max-plus' %}",
         "color_scheme": "scheme-1",
         "padding_top": 40,
         "padding_bottom": 52
@@ -126,6 +126,7 @@
         "product",
         "collection-1"
       ],
+      "disabled": true,
       "settings": {
         "heading": "Multimedia collage",
         "heading_size": "h2",
@@ -139,6 +140,7 @@
     },
     "video": {
       "type": "video",
+      "disabled": true,
       "settings": {
         "heading": "",
         "heading_size": "h1",
@@ -187,6 +189,7 @@
         "column2",
         "column3"
       ],
+      "disabled": true,
       "settings": {
         "title": "",
         "heading_size": "h1",
