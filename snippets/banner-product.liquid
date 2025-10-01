@@ -133,7 +133,7 @@
                   "label": {{ size_label | json }},
                   "qty": {{ vv.inventory_quantity | default: 0 }},
                   "available": {{ vv.available | json }},
-                  "invTracked": {{ vv.inventory_management != blank | json }},
+                  "invTracked": {% if vv.inventory_management %}true{% else %}false{% endif %},
                   "image": {{ vv.image | default: featured_image | image_url: width: 1200 | json }}
                 }{%- if forloop.last == false -%},{%- endif -%}
               {%- endfor -%}
