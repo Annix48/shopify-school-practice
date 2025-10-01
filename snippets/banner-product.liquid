@@ -232,8 +232,10 @@
   padding-right:2px;
 }
 .bp__thumb{
+  max-height: none;  
+  overflow: auto;    
   display:block;
-  padding:0;
+  padding-right: 0;
   border:1px solid var(--bp-border);
   border-radius:12px;
   background:#fff;
@@ -268,7 +270,15 @@
   padding:6px 10px; border-radius:10px; background:#fff; border:1px solid var(--bp-border);
   font-size:14px;
 }
-.bp__chip-dot{ font-size:14px; }
+.bp__chip-dot{ 
+  font-size:14px; 
+}
+.bp__thumbs::-webkit-scrollbar{ 
+  width:0; 
+  height:0; }
+.bp__thumbs{ 
+  scrollbar-width: none; 
+  -ms-overflow-style: none; }
 
 /* ===== Title & price ===== */
 .bp__title{ margin:0 0 8px; font-size:30px; line-height:1.2; font-weight:400; }
