@@ -10,6 +10,9 @@
   - all_products has a request limit — do not overuse it site-wide.
 {%- endcomment -%}
 
+{% render 'banner-product', handle: 'some-product-handle' %}
+    {% render 'banner-product', product: product %}
+
 {%- assign current_product = product | default: null -%}
 {%- if current_product == null and handle -%}
   {%- assign current_product = all_products[handle] -%}
