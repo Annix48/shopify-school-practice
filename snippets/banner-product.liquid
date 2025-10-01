@@ -10,9 +10,6 @@
   - all_products has a request limit — do not overuse it site-wide.
 {%- endcomment -%}
 
-{% render 'banner-product', handle: 'some-product-handle' %}
-    {% render 'banner-product', product: product %}
-
 {%- assign current_product = product | default: null -%}
 {%- if current_product == null and handle -%}
   {%- assign current_product = all_products[handle] -%}
@@ -20,50 +17,58 @@
 
 {%- if current_product == null -%}
   <div class="bp bp--error" style="padding:1rem;border:1px dashed #ddd;border-radius:.75rem">
-    {{ "product.banner.missing_product" | t | default: "Не вдалося завантажити продукт: передайте product або handle." }}
+    {{
+      'product.banner.missing_product'
+      | t
+      | default: 'Не вдалося завантажити продукт: передайте product або handle.'
+    }}
   </div>
 {%- else -%}
+  {%- assign featured_img = current_product.featured_image -%}
+  {%- assign title_safe = current_product.title | escape -%}
 
-{%- assign featured_img = current_product.featured_image -%}
-{%- assign title_safe = current_product.title | escape -%}
-
-{%- comment -%} Determine the Color option index (1..3) {%- endcomment -%}
-{%- assign color_index = 0 -%}
-{%- for opt in current_product.options_with_values -%}
-  {%- assign opt_name = opt.name | downcase -%}
-  {%- if opt_name == 'color' or opt_name == 'colour' or opt_name == 'цвет' or opt_name == 'kolor' -%}
-    {%- assign color_index = forloop.index -%}
-    {%- break -%}
+  {%- comment -%} Determine the Color option index (1..3) {%- endcomment -%}
+  {%- assign color_index = 0 -%}
+  {%- for opt in current_product.options_with_values -%}
+    {%- assign opt_name = opt.name | downcase -%}
+    {%- if opt_name == 'color' or opt_name == 'colour' or opt_name == 'цвет' or opt_name == 'kolor' -%}
+      {%- assign color_index = forloop.index -%}
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if color_index == 0 and current_product.options.size > 0 -%}
+    {%- assign color_index = 1 -%}
   {%- endif -%}
-{%- endfor -%}
-{%- if color_index == 0 and current_product.options.size > 0 -%}
-  {%- assign color_index = 1 -%}
-{%- endif -%}
 
-{%- if color_index == 0 -%}
-  <div class="bp">
-    <div class="bp__head">
-      <strong>{{ title_safe }}</strong>
+  {%- if color_index == 0 -%}
+    <div class="bp">
+      <div class="bp__head">
+        <strong>{{ title_safe }}</strong>
+      </div>
+      <div class="bp__body" style="margin-top:.5rem">
+        {{
+          'product.banner.no_color_option'
+          | t
+          | default: 'Для цього продукту не знайдено опцію «Color». Палітру не відображено.'
+        }}
+      </div>
     </div>
-    <div class="bp__body" style="margin-top:.5rem">
-      {{ "product.banner.no_color_option" | t | default: "Для цього продукту не знайдено опцію «Color». Палітру не відображено." }}
-    </div>
-  </div>
-{%- else -%}
+  {%- else -%}
+    {%- case color_index -%}
+      {%- when 1 -%}
+        {%- assign colors_all = current_product.variants | map: 'option1' -%}
+      {%- when 2 -%}
+        {%- assign colors_all = current_product.variants | map: 'option2' -%}
+      {%- when 3 -%}
+        {%- assign colors_all = current_product.variants | map: 'option3' -%}
+    {%- endcase -%}
+    {%- assign colors_uniq = colors_all | uniq -%}
 
-{%- case color_index -%}
-  {%- when 1 -%}
-    {%- assign colors_all = current_product.variants | map: 'option1' -%}
-  {%- when 2 -%}
-    {%- assign colors_all = current_product.variants | map: 'option2' -%}
-  {%- when 3 -%}
-    {%- assign colors_all = current_product.variants | map: 'option3' -%}
-{%- endcase -%}
-{%- assign colors_uniq = colors_all | uniq -%}
+    {%- assign main_variant = current_product.selected_or_first_available_variant
+      | default: current_product.variants.first
+    -%}
 
-{%- assign main_variant = current_product.selected_or_first_available_variant | default: current_product.variants.first -%}
-
-{%- capture price_block -%}
+    {%- capture price_block -%}
   {%- if main_variant and main_variant.price -%}
     <div class="bp__price" style="display:flex;gap:.5rem;align-items:baseline">
       {%- if main_variant.compare_at_price and main_variant.compare_at_price > main_variant.price -%}
@@ -82,8 +87,8 @@
   {%- endif -%}
 {%- endcapture -%}
 
-{%- assign vendor_down = current_product.vendor | downcase -%}
-{%- capture vendor_badge -%}
+    {%- assign vendor_down = current_product.vendor | downcase -%}
+    {%- capture vendor_badge -%}
   {%- case vendor_down -%}
     {%- when 'nike', 'adidas' -%}
       <span class="bp__badge" style="background:#eef;padding:.25rem .5rem;border-radius:999px;font-size:.75rem">{{ "product.banner.badge.top_brand" | t | default: "Топ бренд" }}</span>
@@ -92,182 +97,197 @@
   {%- endcase -%}
 {%- endcapture -%}
 
-{%- assign variants = current_product.variants -%}
+    {%- assign variants = current_product.variants -%}
 
-<div
-  class="bp"
-  data-product-id="{{ current_product.id }}"
-  style="display:grid;grid-template-columns:160px 1fr;gap:1rem;align-items:start;border:1px solid #eee;border-radius:1rem;padding:1rem"
->
-  <div class="bp__media">
-    {%- if featured_img -%}
-      {%- assign alt_text = featured_img.alt | default: title_safe -%}
-      {{ featured_img | image_url: width: 600 | image_tag: loading: 'lazy', alt: alt_text }}
-    {%- else -%}
-      {{ 'image' | placeholder_svg_tag: 'bp__placeholder' }}
-    {%- endif -%}
-    {%- if current_product.images.size > 1 -%}
-      <div class="bp__thumbs" style="display:flex;gap:.5rem;margin-top:.5rem">
-        {%- for img in current_product.images -%}
-          {%- if forloop.index0 == 0 -%}{%- continue -%}{%- endif -%}
-          {%- if forloop.index > 3 -%}{%- break -%}{%- endif -%}
-          <button
-            type="button"
-            class="bp__thumb"
-            data-image="{{ img | image_url: width: 900 }}"
-            aria-label="{{ 'product.banner.switch_image' | t | default: 'Змінити зображення' }}"
-            style="border:1px solid #eee;border-radius:.5rem;padding:0;background:#fff"
-          >
-            {{ img | image_url: width: 100 | image_tag: loading: 'lazy', alt: img.alt | default: title_safe }}
-          </button>
-        {%- endfor -%}
+    <div
+      class="bp"
+      data-product-id="{{ current_product.id }}"
+      style="display:grid;grid-template-columns:160px 1fr;gap:1rem;align-items:start;border:1px solid #eee;border-radius:1rem;padding:1rem"
+    >
+      <div class="bp__media">
+        {%- if featured_img -%}
+          {%- assign alt_text = featured_img.alt | default: title_safe -%}
+          {{ featured_img | image_url: width: 600 | image_tag: loading: 'lazy', alt: alt_text }}
+        {%- else -%}
+          {{ 'image' | placeholder_svg_tag: 'bp__placeholder' }}
+        {%- endif -%}
+        {%- if current_product.images.size > 1 -%}
+          <div class="bp__thumbs" style="display:flex;gap:.5rem;margin-top:.5rem">
+            {%- for img in current_product.images -%}
+              {%- if forloop.index0 == 0 -%}{%- continue -%}{%- endif -%}
+              {%- if forloop.index > 3 -%}{%- break -%}{%- endif -%}
+              <button
+                type="button"
+                class="bp__thumb"
+                data-image="{{ img | image_url: width: 900 }}"
+                aria-label="{{ 'product.banner.switch_image' | t | default: 'Змінити зображення' }}"
+                style="border:1px solid #eee;border-radius:.5rem;padding:0;background:#fff"
+              >
+                {{ img | image_url: width: 100 | image_tag: loading: 'lazy', alt: img.alt | default: title_safe }}
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
       </div>
-    {%- endif -%}
-  </div>
 
-  <div class="bp__content" style="display:flex;flex-direction:column;gap:.5rem">
-    <div class="bp__top" style="display:flex;justify-content:space-between;align-items:start;gap:.5rem;flex-wrap:wrap">
-      <h3 class="bp__title" style="margin:0;font-size:1.125rem;line-height:1.25">{{ title_safe }}</h3>
-      {{- vendor_badge -}}
-    </div>
-
-    {{- price_block -}}
-
-    <div class="bp__colors">
-      <div class="bp__label" style="font-size:.875rem;margin-bottom:.25rem">
-        {{ "product.banner.select_color" | t | default: "Виберіть колір" }}
-      </div>
-      <div class="bp__swatches" role="list" style="display:flex;gap:.5rem;flex-wrap:wrap">
-        {%- assign printed = 0 -%}
-        {%- for color in colors_uniq -%}
-          {%- if color == blank -%}{%- continue -%}{%- endif -%}
-          {%- case color_index -%}
-            {%- when 1 -%}{%- assign matched = variants | where: 'option1', color -%}
-            {%- when 2 -%}{%- assign matched = variants | where: 'option2', color -%}
-            {%- when 3 -%}{%- assign matched = variants | where: 'option3', color -%}
-          {%- endcase -%}
-          {%- assign v = matched.first -%}
-          {%- if v == null -%}{%- continue -%}{%- endif -%}
-
-          {%- assign qty = v.inventory_quantity | default: 0 -%}
-          {%- assign inv_tracked = v.inventory_quantity != null -%}
-          {%- assign available_flag = v.available -%}
-          {%- assign is_unavailable = (inv_tracked and qty == 0) or (inv_tracked == false and available_flag == false) -%}
-
-          <button
-            type="button"
-            role="listitem"
-            class="bp__swatch"
-            data-variant-id="{{ v.id }}"
-            data-qty="{{ qty }}"
-            data-available="{{ available_flag }}"
-            data-inv-tracked="{{ inv_tracked }}"
-            data-image="{{ v.image | default: featured_img | image_url: width: 900 }}"
-            data-color="{{ color | escape }}"
-            aria-label="{{ color | escape }}"
-            style="min-width:2rem;height:2rem;border-radius:999px;border:1px solid #ccc;display:inline-flex;align-items:center;justify-content:center;background:#fff;position:relative"
-          >
-            <span class="bp__swatch-dot" aria-hidden="true"
-              style="display:block;width:1.25rem;height:1.25rem;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);background: var(--c, #f3f3f3)">
-            </span>
-            <span class="bp__swatch-label" style="position:absolute;left:-9999px">{{ color | escape }}</span>
-          </button>
-
-          {%- assign printed = printed | plus: 1 -%}
-          {%- if printed >= 3 -%}{%- break -%}{%- endif -%}
-        {%- endfor -%}
-      </div>
-    </div>
-
-    <div class="bp__stock" data-stock style="font-size:.875rem;color:#333">
-      {{ "product.banner.select_color" | t | default: "Виберіть колір" }}
-    </div>
-
-    {%- if main_variant -%}
-      <div class="bp__cta" style="margin-top:.25rem">
-        <a
-          href="{{ routes.cart_add_url }}?id={{ main_variant.id }}&quantity=1"
-          class="bp__add"
-          style="display:inline-flex;align-items:center;gap:.5rem;background:#111;color:#fff;border-radius:.5rem;padding:.5rem .75rem;text-decoration:none"
+      <div class="bp__content" style="display:flex;flex-direction:column;gap:.5rem">
+        <div
+          class="bp__top"
+          style="display:flex;justify-content:space-between;align-items:start;gap:.5rem;flex-wrap:wrap"
         >
-          {{ "product.banner.add_to_cart" | t | default: "До кошика" }}
-        </a>
+          <h3 class="bp__title" style="margin:0;font-size:1.125rem;line-height:1.25">{{ title_safe }}</h3>
+          {{- vendor_badge -}}
+        </div>
+
+        {{- price_block -}}
+
+        <div class="bp__colors">
+          <div class="bp__label" style="font-size:.875rem;margin-bottom:.25rem">
+            {{ 'product.banner.select_color' | t | default: 'Виберіть колір' }}
+          </div>
+          <div class="bp__swatches" role="list" style="display:flex;gap:.5rem;flex-wrap:wrap">
+            {%- assign printed = 0 -%}
+            {%- for color in colors_uniq -%}
+              {%- if color == blank -%}{%- continue -%}{%- endif -%}
+              {%- case color_index -%}
+                {%- when 1 -%}
+                  {%- assign matched = variants | where: 'option1', color -%}
+                {%- when 2 -%}
+                  {%- assign matched = variants | where: 'option2', color -%}
+                {%- when 3 -%}
+                  {%- assign matched = variants | where: 'option3', color -%}
+              {%- endcase -%}
+              {%- assign v = matched.first -%}
+              {%- if v == null -%}{%- continue -%}{%- endif -%}
+
+              {%- assign qty = v.inventory_quantity | default: 0 -%}
+              {%- assign inv_tracked = v.inventory_quantity != null -%}
+              {%- assign available_flag = v.available -%}
+
+              {%- assign is_unavailable = false -%}
+              {%- if inv_tracked and qty == 0 -%}
+                {%- assign is_unavailable = true -%}
+              {%- elsif inv_tracked == false and available_flag == false -%}
+                {%- assign is_unavailable = true -%}
+              {%- endif -%}
+
+              <button
+                type="button"
+                role="listitem"
+                class="bp__swatch"
+                data-variant-id="{{ v.id }}"
+                data-qty="{{ qty }}"
+                data-available="{{ available_flag }}"
+                data-inv-tracked="{{ inv_tracked }}"
+                data-image="{{ v.image | default: featured_img | image_url: width: 900 }}"
+                data-color="{{ color | escape }}"
+                aria-label="{{ color | escape }}"
+                style="min-width:2rem;height:2rem;border-radius:999px;border:1px solid #ccc;display:inline-flex;align-items:center;justify-content:center;background:#fff;position:relative"
+              >
+                <span
+                  class="bp__swatch-dot"
+                  aria-hidden="true"
+                  style="display:block;width:1.25rem;height:1.25rem;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);background: var(--c, #f3f3f3)"
+                >
+                </span>
+                <span class="bp__swatch-label" style="position:absolute;left:-9999px">{{ color | escape }}</span>
+              </button>
+
+              {%- assign printed = printed | plus: 1 -%}
+              {%- if printed >= 3 -%}{%- break -%}{%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+
+        <div class="bp__stock" data-stock style="font-size:.875rem;color:#333">
+          {{ 'product.banner.select_color' | t | default: 'Виберіть колір' }}
+        </div>
+
+        {%- if main_variant -%}
+          <div class="bp__cta" style="margin-top:.25rem">
+            <a
+              href="{{ routes.cart_add_url }}?id={{ main_variant.id }}&quantity=1"
+              class="bp__add"
+              style="display:inline-flex;align-items:center;gap:.5rem;background:#111;color:#fff;border-radius:.5rem;padding:.5rem .75rem;text-decoration:none"
+            >
+              {{ 'product.banner.add_to_cart' | t | default: 'До кошика' }}
+            </a>
+          </div>
+        {%- endif -%}
       </div>
-    {%- endif -%}
-  </div>
-</div>
+    </div>
 
-<style>
-  .bp__swatch[data-color*="black" i] .bp__swatch-dot{ --c:#000; }
-  .bp__swatch[data-color*="white" i] .bp__swatch-dot{ --c:#fff; }
-  .bp__swatch[data-color*="red"   i] .bp__swatch-dot{ --c:#e11; }
-  .bp__swatch[data-color*="blue"  i] .bp__swatch-dot{ --c:#39f; }
-  .bp__swatch[data-color*="green" i] .bp__swatch-dot{ --c:#3c6; }
-  .bp__swatch[data-color*="beige" i] .bp__swatch-dot{ --c:#e6d8c3; }
-  .bp__swatch[data-color*="grey" i],
-  .bp__swatch[data-color*="gray" i] .bp__swatch-dot{ --c:#bbb; }
-  .bp__swatch.is-active{ outline:2px solid #111; outline-offset:2px; }
-  .bp__placeholder{ width:100%; height: 140px; background:#f6f6f6; border-radius:.75rem; }
-</style>
+    <style>
+      .bp__swatch[data-color*="black" i] .bp__swatch-dot{ --c:#000; }
+      .bp__swatch[data-color*="white" i] .bp__swatch-dot{ --c:#fff; }
+      .bp__swatch[data-color*="red"   i] .bp__swatch-dot{ --c:#e11; }
+      .bp__swatch[data-color*="blue"  i] .bp__swatch-dot{ --c:#39f; }
+      .bp__swatch[data-color*="green" i] .bp__swatch-dot{ --c:#3c6; }
+      .bp__swatch[data-color*="beige" i] .bp__swatch-dot{ --c:#e6d8c3; }
+      .bp__swatch[data-color*="grey" i],
+      .bp__swatch[data-color*="gray" i] .bp__swatch-dot{ --c:#bbb; }
+      .bp__swatch.is-active{ outline:2px solid #111; outline-offset:2px; }
+      .bp__placeholder{ width:100%; height: 140px; background:#f6f6f6; border-radius:.75rem; }
+    </style>
 
-<script>
-(function(){
-  var root=document.currentScript.closest('.bp');
-  if(!root) return;
+    <script>
+      (function(){
+        var root=document.currentScript.closest('.bp');
+        if(!root) return;
 
-  var stockEl = root.querySelector('[data-stock]');
-  var mainImg = root.querySelector('.bp__media img');
-  var swatches = root.querySelectorAll('.bp__swatch');
+        var stockEl = root.querySelector('[data-stock]');
+        var mainImg = root.querySelector('.bp__media img');
+        var swatches = root.querySelectorAll('.bp__swatch');
 
-  function setActive(btn){
-    swatches.forEach(function(b){ b.classList.remove('is-active'); });
-    btn.classList.add('is-active');
-  }
+        function setActive(btn){
+          swatches.forEach(function(b){ b.classList.remove('is-active'); });
+          btn.classList.add('is-active');
+        }
 
-  function updateStock(btn){
-    var qty = parseInt(btn.dataset.qty, 10);
-    var available = (btn.dataset.available === 'true');
-    var invTracked = (btn.dataset.invTracked === 'true');
+        function updateStock(btn){
+          var qty = parseInt(btn.dataset.qty, 10);
+          var available = (btn.dataset.available === 'true');
+          var invTracked = (btn.dataset.invTracked === 'true');
 
-    var notAvailableText   = {{ "product.banner.not_available"        | t | default: "не доступно"        | json }};
-    var availableWithCount = {{ "product.banner.available_with_count" | t | default: "Доступно: __count__"| json }};
-    var availableGeneric   = {{ "product.banner.available"            | t | default: "У наявності"        | json }};
+          var notAvailableText   = {{ "product.banner.not_available"        | t | default: "не доступно"        | json }};
+          var availableWithCount = {{ "product.banner.available_with_count" | t | default: "Доступно: __count__"| json }};
+          var availableGeneric   = {{ "product.banner.available"            | t | default: "У наявності"        | json }};
 
-    var text = '';
-    if(invTracked){
-      if(isNaN(qty) || qty <= 0){
-        text = notAvailableText;
-      } else {
-        text = availableWithCount.replace('__count__', qty);
-      }
-    } else {
-      text = available ? availableGeneric : notAvailableText;
-    }
-    stockEl.textContent = text;
-  }
+          var text = '';
+          if(invTracked){
+            if(isNaN(qty) || qty <= 0){
+              text = notAvailableText;
+            } else {
+              text = availableWithCount.replace('__count__', qty);
+            }
+          } else {
+            text = available ? availableGeneric : notAvailableText;
+          }
+          stockEl.textContent = text;
+        }
 
-  function switchImage(btn){
-    var src = btn.dataset.image;
-    if(mainImg && src){ mainImg.src = src; }
-  }
+        function switchImage(btn){
+          var src = btn.dataset.image;
+          if(mainImg && src){ mainImg.src = src; }
+        }
 
-  swatches.forEach(function(btn){
-    btn.addEventListener('click', function(){
-      setActive(btn);
-      updateStock(btn);
-      switchImage(btn);
-    });
-  });
+        swatches.forEach(function(btn){
+          btn.addEventListener('click', function(){
+            setActive(btn);
+            updateStock(btn);
+            switchImage(btn);
+          });
+        });
 
-  root.querySelectorAll('.bp__thumb').forEach(function(th){
-    th.addEventListener('click', function(){
-      var src = th.getAttribute('data-image');
-      if(mainImg && src){ mainImg.src = src; }
-    });
-  });
+        root.querySelectorAll('.bp__thumb').forEach(function(th){
+          th.addEventListener('click', function(){
+            var src = th.getAttribute('data-image');
+            if(mainImg && src){ mainImg.src = src; }
+          });
+        });
 
-  if(swatches[0]){ swatches[0].click(); }
-})();
-</script>
-{%- endif -%}
+        if(swatches[0]){ swatches[0].click(); }
+      })();
+    </script>
+  {%- endif -%}
 {%- endif -%}
