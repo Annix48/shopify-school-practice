@@ -1,6 +1,6 @@
-<div class="orphaned-content">
-  This content will never be displayed
-</div>
+{% comment %}
+  
+{% endcomment %}
 {%- assign current_product = product | default: null -%}
 {%- if current_product == null and handle -%}
   {%- assign current_product = all_products[handle] -%}
@@ -12,7 +12,7 @@
   </div>
 {%- else -%}
 
-{%- assign featured_img = current_product.featured_image -%}
+{%- assign featured_image = current_product.featured_image -%}
 {%- assign title_safe = current_product.title | escape -%}
 
 /* ---- find option indexes: color & size ---- */
@@ -65,8 +65,8 @@
 
 <div class="bp" data-product-id="{{ current_product.id }}">
   <div class="bp__media">
-    {%- if featured_img -%}
-      {{ featured_img | image_url: width: 900 | image_tag: loading: 'lazy', alt: featured_img.alt | default: title_safe }}
+    {%- if featured_image -%}
+      {{ featured_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: featured_image.alt | default: title_safe }}
     {%- else -%}
       {{ 'image' | placeholder_svg_tag: 'bp__placeholder' }}
     {%- endif -%}
@@ -107,7 +107,7 @@
           {%- assign v = color_variants.first -%}
           {%- if v == null -%}{%- continue -%}{%- endif -%}
 
-          {%- assign hero_image = v.image | default: featured_img -%}
+          {%- assign hero_image = v.image | default: featured_image -%}
 
           {%- comment -%}
             build sizes JSON for this color (if size option exists)
