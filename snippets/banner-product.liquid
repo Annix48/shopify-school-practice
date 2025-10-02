@@ -304,24 +304,59 @@
 }
 
 /* ===== Title & price ===== */
-.bp__title{ margin:0 0 8px; font-size:30px; line-height:1.2; font-weight:400; }
-.bp__price{ display:flex; gap:10px; align-items:baseline; margin:6px 0 18px; }
-.bp__price--new,.bp__price--regular{ font-weight:400; font-size:16px; }
-.bp__price--old{ opacity:.55; }
+.bp__title{ 
+  margin:0 0 8px; 
+  font-size:30px; 
+  line-height:1.2; 
+  font-weight:400; 
+}
+.bp__price{ 
+  display:flex; 
+  gap:10px; 
+  align-items:baseline; 
+  margin:6px 0 18px; 
+}
+.bp__price--new,.bp__price--regular{ 
+  font-weight:400; 
+  font-size:16px; 
+}
+.bp__price--old{ 
+  opacity:.55; 
+}
 
 /* ===== Labels ===== */
-.bp__label{ font-size:14px; color:var(--bp-muted); margin:4px 0 8px; }
-.bp__label--spaced{ margin-top:18px; }
+.bp__label{ 
+  font-size:14px; 
+  color:var(--bp-muted);
+   margin:4px 0 8px; 
+  }
+.bp__label--spaced{ 
+  margin-top:18px; 
+}
 
 /* ===== Color swatches (as mini-cards) ===== */
-.bp__swatches{ display:flex; gap:12px; flex-wrap:wrap; }
-.bp__swatch{ position:relative; cursor:pointer; }
+.bp__swatches{ 
+  display:flex; 
+  gap:12px; 
+  flex-wrap:wrap; 
+}
+.bp__swatch{ 
+  position:relative; 
+  cursor:pointer; 
+}
 .bp__swatch--thumb{
-  border:1px solid #ccc; border-radius:12px; background:#fff; padding:6px;
+  border:1px solid #ccc; 
+  border-radius:12px; 
+  background:#fff; 
+  padding:6px;
   transition:border-color .15s, box-shadow .15s, transform .05s;
 }
 .bp__swatch--thumb img{
-  display:block; width:84px; height:84px; object-fit:cover; border-radius:10px;
+  display:block; 
+  width:84px;
+   height:84px; 
+   object-fit:cover; 
+   border-radius:10px;
 }
 .bp__swatch.is-active{ outline:2px solid var(--bp-black); outline-offset:3px; }
 .bp__swatch-label{ position:absolute; left:-9999px; }
