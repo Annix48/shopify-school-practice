@@ -358,33 +358,76 @@
    object-fit:cover; 
    border-radius:10px;
 }
-.bp__swatch.is-active{ outline:2px solid var(--bp-black); outline-offset:3px; }
-.bp__swatch-label{ position:absolute; left:-9999px; }
+.bp__swatch.is-active{ 
+  outline:2px solid var(--bp-black); 
+  outline-offset:3px; 
+}
+.bp__swatch-label{ 
+  position:absolute; 
+  left:-9999px; 
+}
 
 /* ===== Sizes ===== */
-.bp__sizes{ margin-top:10px; }
-.bp__sizes-list{ display:grid; grid-template-columns: repeat(3, minmax(160px,1fr)); gap:14px; }
-@media (max-width: 600px){ .bp__sizes-list{ grid-template-columns: repeat(2, minmax(140px,1fr)); } }
-.bp__size{
-  min-height:56px; padding:.8rem 1.2rem; border:1px solid #ddd; border-radius:12px;
-  background:#fff; cursor:pointer; font-weight:500;
+.bp__sizes{ 
+  margin-top:10px; 
 }
-.bp__size.is-active{ border-color:var(--bp-black); box-shadow:0 0 0 2px var(--bp-black) inset; }
-.bp__size.is-disabled{ opacity:.45; cursor:not-allowed; }
+.bp__sizes-list{ 
+  display:grid; 
+  grid-template-columns: repeat(3, minmax(160px,1fr)); 
+  gap:14px; }
+@media (max-width: 600px){ 
+  .bp__sizes-list{ 
+    grid-template-columns: repeat(2, minmax(140px,1fr)); 
+  } 
+}
+.bp__size{
+  min-height:56px; 
+  padding:.8rem 1.2rem; 
+  border:1px solid #ddd; 
+  border-radius:12px;
+  background:#fff; 
+  cursor:pointer; 
+  font-weight:500;
+}
+.bp__size.is-active{ 
+  border-color:var(--bp-black); 
+  box-shadow:0 0 0 2px var(--bp-black) inset; 
+}
+.bp__size.is-disabled{ 
+  opacity:.45; 
+  cursor:not-allowed;
+ }
 
 /* ===== Stock line ===== */
-.bp__stock{ min-height:22px; font-size:14px; color:#333; }
+.bp__stock{ 
+  min-height:22px; 
+  font-size:14px; 
+  color:#333; }
 
 /* ===== CTA ===== */
 .bp__add{
-  display:block; width:100%; text-align:center; margin-top:18px;
-  background:var(--bp-black); color:#fff; text-decoration:none;
-  padding:1rem 1.2rem; border-radius:12px; font-weight:700; font-size:16px;
+  display:block; 
+  width:100%; 
+  text-align:center; 
+  margin-top:18px;
+  background:var(--bp-black); 
+  color:#fff; 
+  text-decoration:none;
+  padding:1rem 1.2rem; 
+  border-radius:12px; 
+  font-weight:700; 
+  font-size:16px;
 }
-.bp__add:focus-visible{ outline:2px solid var(--bp-black); outline-offset:2px; }
+.bp__add:focus-visible{ 
+  outline:2px solid var(--bp-black); 
+  outline-offset:2px; 
+}
 
 /* ===== Note ===== */
-.bp__note{ margin-top:16px; color:#555; line-height:1.6; }
+.bp__note{ 
+  margin-top:16px; 
+  color:#555; 
+  line-height:1.6; }
 </style>
 
 <script>
