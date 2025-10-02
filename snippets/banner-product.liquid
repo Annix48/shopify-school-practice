@@ -120,23 +120,32 @@
           {%- assign hero_image = v.image | default: featured_image -%}
 
          
-          {%- assign unique_urls = '' | split: ',' -%}
-          {%- for vv in color_variants -%}
-            {%- if vv.image -%}
-              {%- assign full = vv.image | image_url: width: 1200 -%}
-              {%- unless unique_urls contains full -%}
-                {%- assign unique_urls = unique_urls | push: full -%}
-              {%- endunless -%}
-            {%- endif -%}
-          {%- endfor -%}
+         {%- comment -%} Уникальные URL картинок для выбранного цвета {%- endcomment -%}
+{%- assign unique_urls = '' | split: '' -%} {# пустой массив #}
+{%- for vv in color_variants -%}
+  {%- if vv.image -%}
+    {%- assign full = vv.image | image_url: width: 1200 -%}
+    {%- unless unique_urls contains full -%}
+      {%- assign unique_urls = unique_urls | concat: [full] -%}
+    {%- endunless -%}
+  {%- endif -%}
+{%- endfor -%}
 
-          {%- capture gallery_json -%}
-          [
-          {%- for u in unique_urls limit:3 -%}
-            {{ u | json }}{%- unless forloop.last -%},{%- endunless -%}
-          {%- endfor -%}
-          ]
-          {%- endcapture -%}
+{%- capture gallery_json -%}
+[
+{%- for u in unique_urls limit: 3 -%}
+  {{ u | json }}{%- unless forloop.last -%},{%- endunless -%}
+{%- endfor -%}
+]
+{%- endcapture -%}
+
+{%- capture gallery_thumbs_json -%}
+[
+{%- for u in unique_urls limit: 3 -%}
+  {{ u | replace: 'width=1200','width=120' | json }}{%- unless forloop.last -%},{%- endunless -%}
+{%- endfor -%}
+]
+{%- endcapture -%}
 
           {%- capture gallery_thumbs_json -%}
           [
@@ -300,9 +309,16 @@
   background:#f3f3f3;
 }
 .bp__chip{
-  position:absolute; left:16px; top:16px;
-  display:inline-flex; align-items:center; gap:8px;
-  padding:6px 10px; border-radius:10px; background:#fff; border:1px solid var(--bp-border);
+  position:absolute; 
+  left:16px; 
+  top:16px;
+  display:inline-flex; 
+  align-items:center;
+  gap:8px;
+  padding:6px 10px; 
+  border-radius:10px; 
+  background:#fff;
+   border:1px solid var(--bp-border);
   font-size:14px;
 }
 .bp__chip-dot{ font-size:14px; }
