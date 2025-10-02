@@ -128,6 +128,20 @@
               {%- assign v = color_variants.first -%}
               {%- if v == null -%}{%- continue -%}{%- endif -%}
 
+               {%- assign hero_image = v.image -%}
+      {%- if hero_image == blank -%}
+        {%- assign color_key = color | downcase -%}
+        {%- for img in current_product.images -%}
+          {%- assign alt_lc = img.alt | downcase -%}
+          {%- if alt_lc contains color_key -%}
+            {%- assign hero_image = img -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+      {%- assign hero_image = hero_image | default: featured_image -%}
+
+      
               {%- assign hero_image = v.image | default: featured_image -%}
 
               {%- assign unique_urls = '' | split: '' -%}
