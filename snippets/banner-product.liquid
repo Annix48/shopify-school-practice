@@ -111,7 +111,6 @@
 
         {%- comment %} COLORS (thumbnails with images) {%- endcomment %}
         <div class="bp__colors">
-          <div class="bp__label">{{ 'products.banner.select_color' | t | default: 'Select color' }}</div>
           <div class="bp__swatches" role="list">
             {%- assign printed = 0 -%}
             {%- for color in colors_uniq -%}
