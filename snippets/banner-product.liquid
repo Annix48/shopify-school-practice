@@ -120,8 +120,7 @@
           {%- assign hero_image = v.image | default: featured_image -%}
 
          
-         {%- comment -%} Уникальные URL картинок для выбранного цвета {%- endcomment -%}
-{%- assign unique_urls = '' | split: '' -%} {# пустой массив #}
+{%- assign unique_urls = '' | split: '' -%} 
 {%- for vv in color_variants -%}
   {%- if vv.image -%}
     {%- assign full = vv.image | image_url: width: 1200 -%}
