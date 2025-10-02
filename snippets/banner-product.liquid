@@ -100,7 +100,6 @@
     <h1 class="bp__title">{{ title_safe }}</h1>
     {{- price_block -}}
 
-
     {%- comment %} COLORS (thumbnails with images) {%- endcomment %}
     <div class="bp__colors">
       <div class="bp__label">{{ 'products.banner.select_color' | t | default: 'Select color' }}</div>
@@ -119,6 +118,39 @@
           {%- if v == null -%}{%- continue -%}{%- endif -%}
 
           {%- assign hero_image = v.image | default: featured_image -%}
+
+         
+          {%- assign unique_urls = '' | split: ',' -%}
+          {%- for vv in color_variants -%}
+            {%- if vv.image -%}
+              {%- assign full = vv.image | image_url: width: 1200 -%}
+              {%- unless unique_urls contains full -%}
+                {%- assign unique_urls = unique_urls | push: full -%}
+              {%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- capture gallery_json -%}
+          [
+          {%- for u in unique_urls limit:3 -%}
+            {{ u | json }}{%- unless forloop.last -%},{%- endunless -%}
+          {%- endfor -%}
+          ]
+          {%- endcapture -%}
+
+          {%- capture gallery_thumbs_json -%}
+          [
+          {%- assign printed_th = 0 -%}
+          {%- for vv in color_variants -%}
+            {%- if vv.image -%}
+              {{ vv.image | image_url: width: 120 | json }}
+              {%- assign printed_th = printed_th | plus: 1 -%}
+              {%- if printed_th < 3 -%},{%- endif -%}
+              {%- if printed_th >= 3 -%}{%- break -%}{%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+          ]
+          {%- endcapture -%}
 
           {%- capture sizes_json -%}
             [
@@ -148,6 +180,8 @@
             class="bp__swatch bp__swatch--thumb"
             data-variant-id="{{ v.id }}"
             data-image="{{ hero_image | image_url: width: 1200 }}"
+            data-gallery='{{ gallery_json | strip | escape }}'
+            data-gallery-thumbs='{{ gallery_thumbs_json | strip | escape }}'
             data-sizes='{{ sizes_json | strip | escape }}'
             aria-label="{{ color | escape }}"
             title="{{ color | escape }}"
@@ -168,20 +202,18 @@
 
     {%- comment %} STOCK LINE {%- endcomment %}
     <div class="bp__label bp__label--spaced">Select Size:</div>
-   
 
-    {%- comment %} SIZES (dynamic, per color) {%- endcomment %}
-<div class="bp__sizes" data-sizes>
-  <div class="bp__sizes-list">
-    <button type="button" class="bp__size">UK 5.5</button>
-    <button type="button" class="bp__size">UK 6 (EU 39)</button>
-    <button type="button" class="bp__size">UK 6 (EU 40)</button>
-    <button type="button" class="bp__size">UK 6.5</button>
-    <button type="button" class="bp__size">UK 7</button>
-    <button type="button" class="bp__size">UK 7.5</button>
-  </div>
-</div>
-
+    {%- comment %} SIZES (mock buttons to match figma layout) {%- endcomment %}
+    <div class="bp__sizes" data-sizes>
+      <div class="bp__sizes-list">
+        <button type="button" class="bp__size">UK 5.5</button>
+        <button type="button" class="bp__size">UK 6 (EU 39)</button>
+        <button type="button" class="bp__size">UK 6 (EU 40)</button>
+        <button type="button" class="bp__size">UK 6.5</button>
+        <button type="button" class="bp__size">UK 7</button>
+        <button type="button" class="bp__size">UK 7.5</button>
+      </div>
+    </div>
 
     {%- if main_variant -%}
       <a href="{{ routes.cart_add_url }}?id={{ main_variant.id }}&quantity=1" class="bp__add">
@@ -213,22 +245,11 @@
   border:1px solid var(--bp-border);
   border-radius: var(--bp-radius);
 }
-@media (max-width: 1400px){ 
-  .bp {
-     grid-template-columns: 620px 1fr; 
-    } 
-  }
-@media (max-width: 1250px){ 
-  .bp{ 
-    grid-template-columns: 580px 1fr; 
-  } 
+@media (max-width: 1400px){ .bp{ grid-template-columns: 620px 1fr; } }
+@media (max-width: 1250px){ .bp{ grid-template-columns: 580px 1fr; } }
+@media (max-width: 1100px){
+  .bp{ grid-template-columns: 1fr; gap: 28px; }
 }
-@media (max-width: 1100px){ 
-  .bp{ 
-    grid-template-columns: 1fr; 
-    gap: 28px; 
-  } 
-  }
 
 /* ===== Media area (thumbs left, hero right) ===== */
 .bp__media{
@@ -246,7 +267,6 @@
   padding-right:2px;
 }
 .bp__thumb{
-  
   display:block;
   padding:0;
   border:1px solid var(--bp-border);
@@ -255,32 +275,28 @@
   cursor:pointer;
   transition:box-shadow .15s, border-color .15s;
 }
-.bp__thumb img{ 
-  display:block; 
-  border-radius:10px;
- }
-.bp__thumb:focus-visible{ 
-  outline:2px solid var(--bp-black); 
-  outline-offset:2px; 
-}
+.bp__thumb img{ display:block; border-radius:10px; }
+.bp__thumb:focus-visible{ outline:2px solid var(--bp-black); outline-offset:2px; }
+
+.bp__thumbs::-webkit-scrollbar { width:0; height:0; }
+.bp__thumbs{ scrollbar-width: none; -ms-overflow-style: none; }
 
 .bp__hero{
   position:relative;
   background:#f3f3f3;
   border-radius:14px;
-  min-height: 560px;  
+  min-height: 560px;
   padding:16px;
-
   display:flex;
   align-items:center;
   justify-content:center;
 }
 .bp__hero img{
-  max-width:100%; 
-  height:auto; 
-  object-fit: contain;  
-  display:block; 
-  border-radius:12px; 
+  max-width:100%;
+  height:auto;
+  object-fit: contain;
+  display:block;
+  border-radius:12px;
   background:#f3f3f3;
 }
 .bp__chip{
@@ -289,171 +305,58 @@
   padding:6px 10px; border-radius:10px; background:#fff; border:1px solid var(--bp-border);
   font-size:14px;
 }
-.bp__chip-dot{ 
-  font-size:14px; 
-}
-
-.bp__thumbs::-webkit-scrollbar { 
-  width:0; 
-  height:0; 
-}
-
-.bp__thumbs{ 
-  scrollbar-width: none; 
-  -ms-overflow-style: none; 
-}
+.bp__chip-dot{ font-size:14px; }
 
 /* ===== Title & price ===== */
-.bp__title{ 
-  margin:0 0 8px; 
-  font-size:30px; 
-  line-height:1.2; 
-  font-weight:400; 
-}
-.bp__price{ 
-  display:flex; 
-  gap:10px; 
-  align-items:baseline; 
-  margin:6px 0 18px; 
-}
-.bp__price--new,.bp__price--regular{ 
-  font-weight:400; 
-  font-size:16px; 
-}
-.bp__price--old{ 
-  opacity:.55; 
-}
+.bp__title{ margin:0 0 8px; font-size:30px; line-height:1.2; font-weight:400; }
+.bp__price{ display:flex; gap:10px; align-items:baseline; margin:6px 0 18px; }
+.bp__price--new,.bp__price--regular{ font-weight:400; font-size:16px; }
+.bp__price--old{ opacity:.55; }
 
 /* ===== Labels ===== */
-.bp__label{ 
-  font-size:14px; 
-  color:var(--bp-muted);
-   margin:4px 0 8px; 
-  }
-.bp__label--spaced{ 
-  margin-top:18px; 
-}
+.bp__label{ font-size:14px; color:var(--bp-muted); margin:4px 0 8px; }
+.bp__label--spaced{ margin-top:18px; }
 
 /* ===== Color swatches (as mini-cards) ===== */
-.bp__swatches{ 
-  display:flex; 
-  gap:12px; 
-  flex-wrap:wrap; 
-}
-.bp__swatch{ 
-  position:relative; 
-  cursor:pointer; 
-}
+.bp__swatches{ display:flex; gap:12px; flex-wrap:wrap; }
+.bp__swatch{ position:relative; cursor:pointer; }
 .bp__swatch--thumb{
-  border:1px solid #ccc; 
-  border-radius:12px; 
-  background:#fff; 
-  padding:6px;
+  border:1px solid #ccc; border-radius:12px; background:#fff; padding:6px;
   transition:border-color .15s, box-shadow .15s, transform .05s;
 }
-/* Hover/active states */
-.bp__swatch--thumb:hover { 
-  box-shadow: 0 0 0 2px var(--bp-black) inset; 
-  transform: translateY(-1px);
-}
-.bp__swatch.is-active { 
-  outline: 2px solid var(--bp-black); 
-  outline-offset: 3px; 
-}
-
-.bp__size:hover { 
-  border-color: var(--bp-black);
-  box-shadow: 0 0 0 1px var(--bp-black) inset;
-}
-.bp__size.is-active {
-  border-color: var(--bp-black);
-  box-shadow: 0 0 0 2px var(--bp-black) inset;
-}
-
-.bp__add:hover {
-  filter: brightness(0.92);
-}
-.bp__add:active {
-  transform: translateY(1px);
-}
-
-.bp__swatch--thumb img{
-  display:block; 
-  width:84px;
-   height:84px; 
-   object-fit:cover; 
-   border-radius:10px;
-}
-.bp__swatch.is-active{ 
-  outline:2px solid var(--bp-black); 
-  outline-offset:3px; 
-}
-.bp__swatch-label{ 
-  position:absolute; 
-  left:-9999px; 
-}
+.bp__swatch--thumb:hover{ box-shadow:0 0 0 2px var(--bp-black) inset; transform:translateY(-1px); }
+.bp__swatch--thumb img{ display:block; width:84px; height:84px; object-fit:cover; border-radius:10px; }
+.bp__swatch.is-active{ outline:2px solid var(--bp-black); outline-offset:3px; }
+.bp__swatch-label{ position:absolute; left:-9999px; }
 
 /* ===== Sizes ===== */
-.bp__sizes{ 
-  margin-top:10px; 
-}
-.bp__sizes-list{ 
-  display:grid; 
-  grid-template-columns: repeat(3, minmax(160px,1fr)); 
-  gap:14px; }
-@media (max-width: 600px){ 
-  .bp__sizes-list{ 
-    grid-template-columns: repeat(2, minmax(140px,1fr)); 
-  } 
-}
+.bp__sizes{ margin-top:10px; }
+.bp__sizes-list{ display:grid; grid-template-columns: repeat(3, minmax(160px,1fr)); gap:14px; }
+@media (max-width: 600px){ .bp__sizes-list{ grid-template-columns: repeat(2, minmax(140px,1fr)); } }
 .bp__size{
-  min-height:56px; 
-  padding:.8rem 1.2rem; 
-  border:1px solid #ddd; 
-  border-radius:12px;
-  background:#fff; 
-  cursor:pointer; 
-  font-weight:500;
+  min-height:56px; padding:.8rem 1.2rem; border:1px solid #ddd; border-radius:12px;
+  background:#fff; cursor:pointer; font-weight:500;
+  transition: box-shadow .15s, border-color .15s, transform .05s;
 }
-.bp__size.is-active{ 
-  border-color:var(--bp-black); 
-  box-shadow:0 0 0 2px var(--bp-black) inset; 
-}
-.bp__size.is-disabled{ 
-  opacity:.45; 
-  cursor:not-allowed;
- }
+.bp__size:hover{ border-color:var(--bp-black); box-shadow:0 0 0 1px var(--bp-black) inset; }
+.bp__size.is-active{ border-color:var(--bp-black); box-shadow:0 0 0 2px var(--bp-black) inset; }
+.bp__size.is-disabled{ opacity:.45; cursor:not-allowed; }
 
 /* ===== Stock line ===== */
-.bp__stock{ 
-  min-height:22px; 
-  font-size:14px; 
-  color:#333; }
+.bp__stock{ min-height:22px; font-size:14px; color:#333; }
 
 /* ===== CTA ===== */
 .bp__add{
-  display:block; 
-  width:100%; 
-  text-align:center; 
-  margin-top:18px;
-  background:var(--bp-black); 
-  color:#fff; 
-  text-decoration:none;
-  padding:1rem 1.2rem; 
-  border-radius:12px; 
-  font-weight:700; 
-  font-size:16px;
+  display:block; width:100%; text-align:center; margin-top:18px;
+  background:var(--bp-black); color:#fff; text-decoration:none;
+  padding:1rem 1.2rem; border-radius:12px; font-weight:700; font-size:16px;
+  transition: filter .15s, transform .05s;
 }
-.bp__add:focus-visible{ 
-  outline:2px solid var(--bp-black); 
-  outline-offset:2px; 
-}
+.bp__add:hover{ filter:brightness(.92); }
+.bp__add:active{ transform:translateY(1px); }
 
 /* ===== Note ===== */
-.bp__note{ 
-  margin-top:16px; 
-  color:#555; 
-  line-height:1.6; }
+.bp__note{ margin-top:16px; color:#555; line-height:1.6; }
 </style>
 
 <script>
@@ -467,6 +370,7 @@
   var addBtn    = root.querySelector('.bp__add');
   var sizesWrap = root.querySelector('[data-sizes]');
   var sizesList = root.querySelector('.bp__sizes-list');
+  var thumbsWrap= root.querySelector('.bp__thumbs');
 
   function setActive(list, btn){
     list.forEach(function(b){ b.classList.remove('is-active'); });
@@ -484,7 +388,23 @@
     } else {
       text = (available === true || available === 'true') ? availableGeneric : notAvailableText;
     }
-    stockEl.textContent = text;
+    if (stockEl) stockEl.textContent = text;
+  }
+
+  function renderThumbs(urls){
+    if(!thumbsWrap) return;
+    thumbsWrap.innerHTML = '';
+    (urls || []).forEach(function(src){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'bp__thumb';
+      b.setAttribute('data-image', src);
+      b.innerHTML = '<img alt="" loading="lazy" src="'+ src.replace('width=1200','width=120') +'">';
+      b.addEventListener('click', function(){
+        if(mainImg){ mainImg.src = src; }
+      });
+      thumbsWrap.appendChild(b);
+    });
   }
 
   function renderSizes(btn){
@@ -494,7 +414,6 @@
     sizesWrap.hidden = (sizes.length === 0);
 
     if(sizes.length === 0){
-      // нет размеров — ведём прямо на цветовой вариант
       if(addBtn && btn.dataset.variantId){
         addBtn.href = '{{ routes.cart_add_url }}?id=' + btn.dataset.variantId + '&quantity=1';
       }
@@ -512,7 +431,6 @@
       b.dataset.invTracked = String(!!s.invTracked);
       b.dataset.image = s.image || '';
 
-      // disabled state
       if((s.invTracked && (!s.qty || s.qty <= 0)) || (!s.invTracked && s.available === false)){
         b.disabled = true;
         b.classList.add('is-disabled');
@@ -533,14 +451,26 @@
   swatches.forEach(function(btn){
     btn.addEventListener('click', function(){
       setActive(swatches, btn);
+
+      // Главное фото
       var img = btn.getAttribute('data-image');
       if(mainImg && img){ mainImg.src = img; }
+
+      // Галерея слева
+      var gal = [];
+      try { gal = JSON.parse(btn.getAttribute('data-gallery') || '[]'); } catch(e){}
+      renderThumbs(gal);
+
+      // Размеры
       renderSizes(btn);
-      stockEl.textContent = {{ "products.banner.select_size" | t | default: "Select size" | json }};
+
+      if (stockEl){
+        stockEl.textContent = {{ "products.banner.select_size" | t | default: "Select size" | json }};
+      }
     });
   });
 
-  // vertical thumbs (left)
+  // vertical thumbs (initial)
   root.querySelectorAll('.bp__thumb').forEach(function(th){
     th.addEventListener('click', function(){
       var src = th.getAttribute('data-image');
@@ -552,8 +482,6 @@
   if(swatches[0]){ swatches[0].click(); }
 })();
 </script>
-
-
 
 {%- endif -%}
 {%- endif -%}
