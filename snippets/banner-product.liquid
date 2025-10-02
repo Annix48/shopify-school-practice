@@ -161,7 +161,21 @@
 {%- endfor -%}
 ]
 {%- endcapture -%}
-
+<button
+        type="button"
+        role="listitem"
+        class="bp__swatch bp__swatch--thumb"
+        data-variant-id="{{ v.id }}"
+        data-image="{{ hero_image | image_url: width: 1200 }}"
+        data-gallery='{{ gallery_json | strip | escape }}'
+        aria-label="{{ color | escape }}"
+        title="{{ color | escape }}"
+      >
+        {{ hero_image | image_url: width: 180 | image_tag: loading: 'lazy', alt: color }}
+        <span class="bp__swatch-label">{{ color | escape }}</span>
+      </button>
+      {%- assign printed = printed | plus: 1 -%}
+      {%- if printed >= 3 -%}{%- break -%}{%- endif -%}
               {%- capture gallery_thumbs_json -%}
 [
 {%- for u in unique_urls limit: 3 -%}
