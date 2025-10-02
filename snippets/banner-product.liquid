@@ -351,6 +351,32 @@
   padding:6px;
   transition:border-color .15s, box-shadow .15s, transform .05s;
 }
+/* Hover/active states */
+.bp__swatch--thumb:hover { 
+  box-shadow: 0 0 0 2px var(--bp-black) inset; 
+  transform: translateY(-1px);
+}
+.bp__swatch.is-active { 
+  outline: 2px solid var(--bp-black); 
+  outline-offset: 3px; 
+}
+
+.bp__size:hover { 
+  border-color: var(--bp-black);
+  box-shadow: 0 0 0 1px var(--bp-black) inset;
+}
+.bp__size.is-active {
+  border-color: var(--bp-black);
+  box-shadow: 0 0 0 2px var(--bp-black) inset;
+}
+
+.bp__add:hover {
+  filter: brightness(0.92);
+}
+.bp__add:active {
+  transform: translateY(1px);
+}
+
 .bp__swatch--thumb img{
   display:block; 
   width:84px;
