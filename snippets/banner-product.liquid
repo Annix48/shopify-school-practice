@@ -148,7 +148,7 @@
                 {%- if vv.image -%}
                   {%- assign full = vv.image | image_url: width: 1200 -%}
                   {%- unless unique_urls contains full -%}
-                    {%- assign unique_urls = unique_urls | concat: [full] -%}
+                    {%- assign unique_urls = unique_urls | concat: self[full] -%}
                   {%- endunless -%}
                 {%- endif -%}
               {%- endfor -%}
@@ -536,3 +536,13 @@
     </script>
   {%- endif -%}
 {%- endif -%}
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: "{%- assign unique_urls = unique_urls | concat: [full] -%}"
+  to: "{%- assign unique_urls = unique_urls | concat: self[full] -%}"
+  position: 6254..6315
+{% endcomment %}
